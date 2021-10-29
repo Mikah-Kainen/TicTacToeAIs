@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using TikTakToe.DrawStuff;
+using TikTakToe.Players;
 
 namespace TikTakToe.ScreenStuff
 {
@@ -13,6 +14,9 @@ namespace TikTakToe.ScreenStuff
     {
         public List<GameObject> Objects { get; set; }
         public Sprite[][] Tiles { get; set; }
+
+        public Color NextColor { get; set; }
+        public Player Player { get; set; }
 
         public PlayScreen()
         {
@@ -28,14 +32,34 @@ namespace TikTakToe.ScreenStuff
                     Objects.Add(Tiles[y][x]);
                 }
             }
+
+            NextColor = Color.Red;
+            Player = new BasicPlayer(Color.Red);
+
+            Tiles[0][1].Tint = Color.Red;
+            Tiles[0][2].Tint = Color.Red;
         }
 
         public void Update(GameTime gameTime)
         {
-            //for(int i = 0; i < Objects.Count; i ++)
-            //{
-            //    Objects[i].Update(gameTime);
-            //}
+            double[] simulatingOutputs = new double[]
+            {
+                0,
+                0,
+                0,
+
+                1,
+                0,
+                0,
+
+                0,
+                0,
+                0,
+            };
+
+            //            UpdateTile(GetTile(simulatingOutputs));
+            var result = Player.SelectTile(Tiles);
+            result.Tint = Color.Red;
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -45,5 +69,47 @@ namespace TikTakToe.ScreenStuff
                 Objects[i].Draw(spriteBatch);
             }
         }
+
+        public Sprite GetTile(double[] outputs)
+        {
+            Sprite returnValue = null;
+            for(int i = 0; i < outputs.Length; i ++)
+            {
+                if(outputs[i] == 1)
+                {
+                    if (returnValue == null)
+                    {
+                        returnValue = Tiles[i / Tiles.Length][i % Tiles.Length];
+                    }
+                    else
+                    {
+                        throw new Exception("Multiple Tiles Selected");
+                    }
+                }
+            }
+            if(returnValue != null)
+            {
+                return returnValue;
+            }
+            throw new Exception("No Tile Selected");
+        }
+
+        public void UpdateTile(Sprite targetTile)
+        {
+            if(targetTile.Tint != Color.White)
+            {
+//                throw new Exception("Tile Was Already Selected");
+            }
+            targetTile.Tint = NextColor;
+            if (NextColor == Color.Red)
+            {
+                NextColor = Color.Blue;
+            }
+            else
+            {
+                NextColor = Color.Red;
+            }
+        }
+
     }
 }
