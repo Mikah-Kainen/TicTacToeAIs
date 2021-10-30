@@ -10,7 +10,7 @@ namespace TikTakToe.Players
 {
     public abstract class Player
     {
-        public Color PlayerColor { get; private set; }
+        public Color PlayerColor { get; set; }
         public Player(Color playerColor)
         {
             PlayerColor = playerColor;

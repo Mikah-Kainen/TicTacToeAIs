@@ -36,8 +36,9 @@ namespace TikTakToe.ScreenStuff
             NextColor = Color.Red;
             Player = new BasicPlayer(Color.Red);
 
-            Tiles[0][1].Tint = Color.Red;
-            Tiles[0][2].Tint = Color.Red;
+            Tiles[0][0].Tint = Color.Red;
+            Tiles[2][2].Tint = Color.Red;
+            Tiles[1][2].Tint = Color.Red;
         }
 
         public void Update(GameTime gameTime)
@@ -57,7 +58,7 @@ namespace TikTakToe.ScreenStuff
                 0,
             };
 
-            //            UpdateTile(GetTile(simulatingOutputs));
+            //UpdateTile(GetTile(simulatingOutputs));
             var result = Player.SelectTile(Tiles);
             result.Tint = Color.Red;
         }
