@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 using System;
 using System.Collections.Generic;
@@ -12,14 +13,20 @@ namespace TikTakToe.ScreenStuff
 {
     public class PlayScreen : IScreen
     {
+        public InputManager InputManager { get; set; }
         public List<GameObject> Objects { get; set; }
         public Sprite[][] Tiles { get; set; }
 
-        public Color NextColor { get; set; }
-        public Player Player { get; set; }
+        public Random Random { get; set; }
+        public Player RedPlayer { get; set; }
+        public Player BluePlayer { get; set; }
 
-        public PlayScreen()
+        private Player previousPlayer;
+        private Player nextPlayer;
+        
+        public PlayScreen(InputManager inputManager)
         {
+            InputManager = inputManager;
             Objects = new List<GameObject>();
             Tiles = new Sprite[3][];
 
@@ -33,16 +40,21 @@ namespace TikTakToe.ScreenStuff
                 }
             }
 
-            NextColor = Color.Red;
-            Player = new BasicPlayer(Color.Red);
+            Random = new Random();
 
-            Tiles[0][0].Tint = Color.Red;
-            Tiles[2][2].Tint = Color.Red;
-            Tiles[1][2].Tint = Color.Red;
+            RedPlayer = new BasicPlayer(Color.Red, Random);
+            BluePlayer = new BasicPlayer(Color.Blue, Random);
+            previousPlayer = BluePlayer;
+            nextPlayer = RedPlayer;
+          
+            //Tiles[0][0].Tint = Color.Red;
+            //Tiles[2][2].Tint = Color.Red;
+            //Tiles[1][2].Tint = Color.Red;
         }
 
         public void Update(GameTime gameTime)
         {
+            InputManager.Update(gameTime);
             double[] simulatingOutputs = new double[]
             {
                 0,
@@ -59,8 +71,19 @@ namespace TikTakToe.ScreenStuff
             };
 
             //UpdateTile(GetTile(simulatingOutputs));
-            var result = Player.SelectTile(Tiles);
-            result.Tint = Color.Red;
+            if (InputManager.WasKeyPressed(Keys.Space))
+            {
+                nextPlayer.SelectTile(Tiles).Tint = nextPlayer.PlayerColor;
+                Player temp = nextPlayer;
+                nextPlayer = previousPlayer;
+                previousPlayer = temp;
+
+                Color winner = DidPlayerWin();
+                if(winner != Color.White)
+                {
+                    Game1.ScreenManager.SetScreen(new WinnerScreen(winner, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                }
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -71,45 +94,66 @@ namespace TikTakToe.ScreenStuff
             }
         }
 
-        public Sprite GetTile(double[] outputs)
+        public Color DidPlayerWin()
         {
-            Sprite returnValue = null;
-            for(int i = 0; i < outputs.Length; i ++)
+            for (int y = 0; y < Tiles.Length; y++)
             {
-                if(outputs[i] == 1)
+                for (int x = 0; x < Tiles[y].Length; x++)
                 {
-                    if (returnValue == null)
+                    bool canMoveRight = x + 2 < Tiles[y].Length;
+                    bool canMoveLeft = x - 2 >= 0;
+                    bool canMoveDown = y + 2 < Tiles.Length;
+                    if (Tiles[y][x].Tint != Color.White)
                     {
-                        returnValue = Tiles[i / Tiles.Length][i % Tiles.Length];
-                    }
-                    else
-                    {
-                        throw new Exception("Multiple Tiles Selected");
+                        Color OpponentColor = Tiles[y][x].Tint;
+                        if (canMoveRight)
+                        {
+                            if (Tiles[y][x + 1].Tint == Color.White && Tiles[y][x + 2].Tint == OpponentColor)
+                            {
+                                return Tiles[y][x + 1].Tint;
+                            }
+                            else if (Tiles[y][x + 1].Tint == OpponentColor && Tiles[y][x + 2].Tint == Color.White)
+                            {
+                                return Tiles[y][x + 2].Tint;
+                            }
+                        }
+                        if (canMoveDown)
+                        {
+                            if (Tiles[y + 1][x].Tint == Color.White && Tiles[y + 2][x].Tint == OpponentColor)
+                            {
+                                return Tiles[y + 1][x].Tint;
+                            }
+                            else if (Tiles[y + 1][x].Tint == OpponentColor && Tiles[y + 2][x].Tint == Color.White)
+                            {
+                                return Tiles[y + 2][x].Tint;
+                            }
+                        }
+                        if (canMoveDown && canMoveRight)
+                        {
+                            if (Tiles[y + 1][x + 1].Tint == Color.White && Tiles[y + 2][x + 2].Tint == OpponentColor)
+                            {
+                                return Tiles[y + 1][x + 1].Tint;
+                            }
+                            else if (Tiles[y + 1][x + 1].Tint == OpponentColor && Tiles[y + 2][x + 2].Tint == Color.White)
+                            {
+                                return Tiles[y + 2][x + 2].Tint;
+                            }
+                        }
+                        if (canMoveDown && canMoveLeft)
+                        {
+                            if (Tiles[y + 1][x - 1].Tint == Color.White && Tiles[y + 2][x - 2].Tint == OpponentColor)
+                            {
+                                return Tiles[y + 1][x - 1].Tint;
+                            }
+                            else if (Tiles[y + 1][x - 1].Tint == OpponentColor && Tiles[y + 2][x - 2].Tint == Color.White)
+                            {
+                                return Tiles[y + 2][x - 2].Tint;
+                            }
+                        }
                     }
                 }
             }
-            if(returnValue != null)
-            {
-                return returnValue;
-            }
-            throw new Exception("No Tile Selected");
-        }
-
-        public void UpdateTile(Sprite targetTile)
-        {
-            if(targetTile.Tint != Color.White)
-            {
-//                throw new Exception("Tile Was Already Selected");
-            }
-            targetTile.Tint = NextColor;
-            if (NextColor == Color.Red)
-            {
-                NextColor = Color.Blue;
-            }
-            else
-            {
-                NextColor = Color.Red;
-            }
+            return Color.White;
         }
 
     }
