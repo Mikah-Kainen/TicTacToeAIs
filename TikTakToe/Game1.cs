@@ -12,12 +12,12 @@ namespace TikTakToe
 {
     public class Game1 : Game
     {
+        public static InputManager InputManager;
+
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        private InputManager inputManager;
 
         public static ScreenManager ScreenManager;
-        private static Texture2D pixel;
         public static Texture2D WhitePixel;
         public Game1()
         {
@@ -25,7 +25,7 @@ namespace TikTakToe
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             IsFixedTimeStep = false;
-            inputManager = new InputManager();
+            InputManager = new InputManager();
         }
 
         protected override void Initialize()
@@ -35,7 +35,7 @@ namespace TikTakToe
             base.Initialize();
             WhitePixel = Color.White.CreatePixel(graphics);
             ScreenManager = new ScreenManager();
-            ScreenManager.SetScreen(new PlayScreen(inputManager));
+            ScreenManager.SetScreen(new PlayScreen());
         }
 
         protected override void LoadContent()

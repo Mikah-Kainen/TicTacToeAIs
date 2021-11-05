@@ -13,8 +13,7 @@ namespace TikTakToe.ScreenStuff
     {
         public List<GameObject> Objects { get; set; }
 
-        public abstract void Update(GameTime gameTime);
-
-        public abstract void Draw(SpriteBatch spriteBatch);
+        public void Update(GameTime gameTime);
+        public void Draw(SpriteBatch spriteBatch);
     }
 }

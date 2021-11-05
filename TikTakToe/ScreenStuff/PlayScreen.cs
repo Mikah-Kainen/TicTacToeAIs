@@ -13,7 +13,6 @@ namespace TikTakToe.ScreenStuff
 {
     public class PlayScreen : IScreen
     {
-        public InputManager InputManager { get; set; }
         public List<GameObject> Objects { get; set; }
         public Sprite[][] Tiles { get; set; }
 
@@ -24,9 +23,8 @@ namespace TikTakToe.ScreenStuff
         private Player previousPlayer;
         private Player nextPlayer;
         
-        public PlayScreen(InputManager inputManager)
+        public PlayScreen()
         {
-            InputManager = inputManager;
             Objects = new List<GameObject>();
             Tiles = new Sprite[3][];
 
@@ -40,7 +38,7 @@ namespace TikTakToe.ScreenStuff
                 }
             }
 
-            Random = new Random();
+            Random = new Random(); 
 
             RedPlayer = new BasicPlayer(Color.Red, Random);
             BluePlayer = new BasicPlayer(Color.Blue, Random);
@@ -49,12 +47,11 @@ namespace TikTakToe.ScreenStuff
           
             //Tiles[0][0].Tint = Color.Red;
             //Tiles[2][2].Tint = Color.Red;
-            //Tiles[1][2].Tint = Color.Red;
+            Tiles[1][1].Tint = Color.Red;
         }
 
         public void Update(GameTime gameTime)
         {
-            InputManager.Update(gameTime);
             double[] simulatingOutputs = new double[]
             {
                 0,
@@ -70,8 +67,12 @@ namespace TikTakToe.ScreenStuff
                 0,
             };
 
-            //UpdateTile(GetTile(simulatingOutputs));
-            if (InputManager.WasKeyPressed(Keys.Space))
+            Game1.InputManager.Update(gameTime);
+            for (int i = 0; i < Objects.Count; i++)
+            {
+                Objects[i].Update(gameTime);
+            }
+            if (Game1.InputManager.WasKeyPressed(Keys.Space))
             {
                 nextPlayer.SelectTile(Tiles).Tint = nextPlayer.PlayerColor;
                 Player temp = nextPlayer;
@@ -81,7 +82,11 @@ namespace TikTakToe.ScreenStuff
                 Color winner = DidPlayerWin();
                 if(winner != Color.White)
                 {
-                    Game1.ScreenManager.SetScreen(new WinnerScreen(winner, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                    Game1.ScreenManager.SetScreen(new EndScreen(winner, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                }
+                else if(!IsPlayable())
+                {
+                    Game1.ScreenManager.SetScreen(new EndScreen(Color.White, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
                 }
             }
         }
@@ -105,47 +110,47 @@ namespace TikTakToe.ScreenStuff
                     bool canMoveDown = y + 2 < Tiles.Length;
                     if (Tiles[y][x].Tint != Color.White)
                     {
-                        Color OpponentColor = Tiles[y][x].Tint;
+                        Color TargetColor = Tiles[y][x].Tint;
                         if (canMoveRight)
                         {
-                            if (Tiles[y][x + 1].Tint == Color.White && Tiles[y][x + 2].Tint == OpponentColor)
+                            if (Tiles[y][x + 1].Tint == TargetColor && Tiles[y][x + 2].Tint == TargetColor)
                             {
                                 return Tiles[y][x + 1].Tint;
                             }
-                            else if (Tiles[y][x + 1].Tint == OpponentColor && Tiles[y][x + 2].Tint == Color.White)
+                            else if (Tiles[y][x + 1].Tint == TargetColor && Tiles[y][x + 2].Tint == TargetColor)
                             {
                                 return Tiles[y][x + 2].Tint;
                             }
                         }
                         if (canMoveDown)
                         {
-                            if (Tiles[y + 1][x].Tint == Color.White && Tiles[y + 2][x].Tint == OpponentColor)
+                            if (Tiles[y + 1][x].Tint == TargetColor && Tiles[y + 2][x].Tint == TargetColor)
                             {
                                 return Tiles[y + 1][x].Tint;
                             }
-                            else if (Tiles[y + 1][x].Tint == OpponentColor && Tiles[y + 2][x].Tint == Color.White)
+                            else if (Tiles[y + 1][x].Tint == TargetColor && Tiles[y + 2][x].Tint == TargetColor)
                             {
                                 return Tiles[y + 2][x].Tint;
                             }
                         }
                         if (canMoveDown && canMoveRight)
                         {
-                            if (Tiles[y + 1][x + 1].Tint == Color.White && Tiles[y + 2][x + 2].Tint == OpponentColor)
+                            if (Tiles[y + 1][x + 1].Tint == TargetColor && Tiles[y + 2][x + 2].Tint == TargetColor)
                             {
                                 return Tiles[y + 1][x + 1].Tint;
                             }
-                            else if (Tiles[y + 1][x + 1].Tint == OpponentColor && Tiles[y + 2][x + 2].Tint == Color.White)
+                            else if (Tiles[y + 1][x + 1].Tint == TargetColor && Tiles[y + 2][x + 2].Tint == TargetColor)
                             {
                                 return Tiles[y + 2][x + 2].Tint;
                             }
                         }
                         if (canMoveDown && canMoveLeft)
                         {
-                            if (Tiles[y + 1][x - 1].Tint == Color.White && Tiles[y + 2][x - 2].Tint == OpponentColor)
+                            if (Tiles[y + 1][x - 1].Tint == TargetColor && Tiles[y + 2][x - 2].Tint == TargetColor)
                             {
                                 return Tiles[y + 1][x - 1].Tint;
                             }
-                            else if (Tiles[y + 1][x - 1].Tint == OpponentColor && Tiles[y + 2][x - 2].Tint == Color.White)
+                            else if (Tiles[y + 1][x - 1].Tint == TargetColor && Tiles[y + 2][x - 2].Tint == TargetColor)
                             {
                                 return Tiles[y + 2][x - 2].Tint;
                             }
@@ -156,5 +161,19 @@ namespace TikTakToe.ScreenStuff
             return Color.White;
         }
 
+        public bool IsPlayable()
+        {
+            foreach(Sprite[] tiles in Tiles)
+            {
+                foreach (Sprite tile in tiles)
+                {
+                    if (tile.Tint == Color.White)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

@@ -12,6 +12,7 @@ namespace TikTakToe
     {
         public KeyboardState PreviousKeyBoard { get; set; }
         public KeyboardState KeyBoard { get; set; }
+        public MouseState PreviousMouse { get; set; }
         public MouseState Mouse { get; set; }
         public InputManager()
         {
@@ -23,6 +24,7 @@ namespace TikTakToe
         {
             PreviousKeyBoard = KeyBoard;
             KeyBoard = Keyboard.GetState();
+            PreviousMouse = Mouse;
             Mouse = Microsoft.Xna.Framework.Input.Mouse.GetState();
         }
 
