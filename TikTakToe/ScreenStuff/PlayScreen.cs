@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using TikTakToe.DrawStuff;
-using TikTakToe.Players;
+using TikTakToe.PlayerTypes;
 
 namespace TikTakToe.ScreenStuff
 {
@@ -40,14 +40,14 @@ namespace TikTakToe.ScreenStuff
 
             Random = new Random(); 
 
-            RedPlayer = new BasicPlayer(Color.Red, Random);
+            RedPlayer = new BasicPlayer(Color.Purple, Random);
             BluePlayer = new BasicPlayer(Color.Blue, Random);
             previousPlayer = BluePlayer;
             nextPlayer = RedPlayer;
           
             //Tiles[0][0].Tint = Color.Red;
             //Tiles[2][2].Tint = Color.Red;
-            Tiles[1][1].Tint = Color.Red;
+            //Tiles[1][1].Tint = Color.Red;
         }
 
         public void Update(GameTime gameTime)
@@ -99,81 +99,5 @@ namespace TikTakToe.ScreenStuff
             }
         }
 
-        public Color DidPlayerWin()
-        {
-            for (int y = 0; y < Tiles.Length; y++)
-            {
-                for (int x = 0; x < Tiles[y].Length; x++)
-                {
-                    bool canMoveRight = x + 2 < Tiles[y].Length;
-                    bool canMoveLeft = x - 2 >= 0;
-                    bool canMoveDown = y + 2 < Tiles.Length;
-                    if (Tiles[y][x].Tint != Color.White)
-                    {
-                        Color TargetColor = Tiles[y][x].Tint;
-                        if (canMoveRight)
-                        {
-                            if (Tiles[y][x + 1].Tint == TargetColor && Tiles[y][x + 2].Tint == TargetColor)
-                            {
-                                return Tiles[y][x + 1].Tint;
-                            }
-                            else if (Tiles[y][x + 1].Tint == TargetColor && Tiles[y][x + 2].Tint == TargetColor)
-                            {
-                                return Tiles[y][x + 2].Tint;
-                            }
-                        }
-                        if (canMoveDown)
-                        {
-                            if (Tiles[y + 1][x].Tint == TargetColor && Tiles[y + 2][x].Tint == TargetColor)
-                            {
-                                return Tiles[y + 1][x].Tint;
-                            }
-                            else if (Tiles[y + 1][x].Tint == TargetColor && Tiles[y + 2][x].Tint == TargetColor)
-                            {
-                                return Tiles[y + 2][x].Tint;
-                            }
-                        }
-                        if (canMoveDown && canMoveRight)
-                        {
-                            if (Tiles[y + 1][x + 1].Tint == TargetColor && Tiles[y + 2][x + 2].Tint == TargetColor)
-                            {
-                                return Tiles[y + 1][x + 1].Tint;
-                            }
-                            else if (Tiles[y + 1][x + 1].Tint == TargetColor && Tiles[y + 2][x + 2].Tint == TargetColor)
-                            {
-                                return Tiles[y + 2][x + 2].Tint;
-                            }
-                        }
-                        if (canMoveDown && canMoveLeft)
-                        {
-                            if (Tiles[y + 1][x - 1].Tint == TargetColor && Tiles[y + 2][x - 2].Tint == TargetColor)
-                            {
-                                return Tiles[y + 1][x - 1].Tint;
-                            }
-                            else if (Tiles[y + 1][x - 1].Tint == TargetColor && Tiles[y + 2][x - 2].Tint == TargetColor)
-                            {
-                                return Tiles[y + 2][x - 2].Tint;
-                            }
-                        }
-                    }
-                }
-            }
-            return Color.White;
-        }
-
-        public bool IsPlayable()
-        {
-            foreach(Sprite[] tiles in Tiles)
-            {
-                foreach (Sprite tile in tiles)
-                {
-                    if (tile.Tint == Color.White)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
     }
 }

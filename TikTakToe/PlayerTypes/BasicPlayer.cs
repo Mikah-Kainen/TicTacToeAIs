@@ -6,7 +6,7 @@ using System.Text;
 
 using TikTakToe.DrawStuff;
 
-namespace TikTakToe.Players
+namespace TikTakToe.PlayerTypes
 {
     public class BasicPlayer : Player
     {
