@@ -14,40 +14,34 @@ namespace TikTakToe.ScreenStuff
     public class PlayScreen : IScreen
     {
         public List<GameObject> Objects { get; set; }
-        public Sprite[][] Tiles { get; set; }
-
+        public Board CurrentBoard { get; set; }
         public Random Random { get; set; }
         public Player RedPlayer { get; set; }
         public Player BluePlayer { get; set; }
 
         private Player previousPlayer;
         private Player nextPlayer;
-        
+
+        public Dictionary<Players, Color> PlayerColor = new Dictionary<Players, Color>()
+        {
+            [Players.None] = Color.White,
+            [Players.Player1] = Color.Gold,
+            [Players.Player2] = Color.Maroon,
+        };
+
         public PlayScreen()
         {
             Objects = new List<GameObject>();
-            Tiles = new Sprite[3][];
-
-            for (int y = 0; y < 3; y ++)
-            {
-                Tiles[y] = new Sprite[3];
-                for (int x = 0; x < 3; x ++)
-                {
-                    Tiles[y][x] = new Sprite(Game1.WhitePixel, Color.White, new Vector2(50 + 105 * x, 50 + 105 * y), Vector2.One, new Vector2(100, 100), Vector2.Zero);
-                    Objects.Add(Tiles[y][x]);
-                }
-            }
+            CurrentBoard = new Board(3, 3);
 
             Random = new Random(); 
 
-            RedPlayer = new BasicPlayer(Color.Purple, Random);
-            BluePlayer = new BasicPlayer(Color.Blue, Random);
+            RedPlayer = new BasicPlayer(Players.Player1, Random);
+            BluePlayer = new BasicPlayer(Players.Player2, Random);
             previousPlayer = BluePlayer;
             nextPlayer = RedPlayer;
-          
-            //Tiles[0][0].Tint = Color.Red;
-            //Tiles[2][2].Tint = Color.Red;
-            //Tiles[1][1].Tint = Color.Red;
+
+            CurrentBoard[1][1] = Players.Player1;
         }
 
         public void Update(GameTime gameTime)
@@ -74,25 +68,32 @@ namespace TikTakToe.ScreenStuff
             }
             if (Game1.InputManager.WasKeyPressed(Keys.Space))
             {
-                nextPlayer.SelectTile(Tiles).Tint = nextPlayer.PlayerColor;
+                (int y, int x) selected = nextPlayer.SelectTile(CurrentBoard);
+                CurrentBoard[selected.y][selected.x] = nextPlayer.PlayerID;
+                if(CurrentBoard.DidPlayerWin(nextPlayer.PlayerID))
+                {
+                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[nextPlayer.PlayerID], Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                }
+                else if(!CurrentBoard.IsPlayable())
+                {
+                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[Players.None], Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                }
                 Player temp = nextPlayer;
                 nextPlayer = previousPlayer;
                 previousPlayer = temp;
-
-                Color winner = DidPlayerWin();
-                if(winner != Color.White)
-                {
-                    Game1.ScreenManager.SetScreen(new EndScreen(winner, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
-                }
-                else if(!IsPlayable())
-                {
-                    Game1.ScreenManager.SetScreen(new EndScreen(Color.White, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
-                }
             }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            for(int y = 0; y < CurrentBoard.Length; y ++)
+            {
+                for(int x = 0; x < CurrentBoard[y].Length; x ++)
+                {
+                    Vector2 Position = new Vector2(25 + 104 * x, 25 + 104 * y);
+                    spriteBatch.Draw(Game1.WhitePixel, Position, null, PlayerColor[CurrentBoard[y][x]], 0, Vector2.Zero, new Vector2(100, 100), SpriteEffects.None, 1);
+                }
+            }
             for(int i = 0; i < Objects.Count; i ++)
             {
                 Objects[i].Draw(spriteBatch);

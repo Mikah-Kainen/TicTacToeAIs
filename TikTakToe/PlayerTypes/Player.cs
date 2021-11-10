@@ -10,12 +10,12 @@ namespace TikTakToe.PlayerTypes
 {
     public abstract class Player
     {
-        public Color PlayerColor { get; set; }
-        public Player(Color playerColor)
+        public Players PlayerID { get; set; }
+        public Player(Players playerID)
         {
-            PlayerColor = playerColor;
+            PlayerID = playerID;
         }
 
-        public abstract Sprite SelectTile(Sprite[][] currentGame);
+        public abstract (int y, int x) SelectTile(Board currentGame);
     }
 }

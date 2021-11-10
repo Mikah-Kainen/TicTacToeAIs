@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,12 +11,13 @@ namespace TikTakToe
     public class Board : IGameState<Board>
     {
         public Players[][] CurrentGame;
+        public int Length => CurrentGame.Length;
         public Players CurrentPlayer;
         public bool IsWin => DidPlayerWin(CurrentPlayer);
 
         public bool IsTie => !IsPlayable();
 
-        public bool IsLose => throw new NotImplementedException();
+        public bool IsLose => DidPlayerLose(CurrentPlayer);
 
         public bool IsTerminal => IsWin || IsTie || IsLose;
 
@@ -27,6 +30,33 @@ namespace TikTakToe
         {
             CurrentGame = currentGame;
             CurrentPlayer = currentPlayer;
+        }
+
+        public Players[] this[int index]
+        {
+            get
+            {
+
+                return CurrentGame[index];
+            }
+            set
+            {
+                CurrentGame[index] = value;
+            }
+        }
+
+        public Board(int xSize, int ySize)
+        {
+            CurrentGame = new Players[ySize][];
+
+            for (int y = 0; y < ySize; y++)
+            {
+                CurrentGame[y] = new Players[xSize];
+                for (int x = 0; x < xSize; x++)
+                {
+                    CurrentGame[y][x] = Players.None;
+                }
+            }
         }
 
         public bool DidPlayerWin(Players currentPlayer)
@@ -87,7 +117,7 @@ namespace TikTakToe
                     }
                 }
             }
-            return false ;
+            return false;
         }
 
         public bool DidPlayerLose(Players currentPlayer)
