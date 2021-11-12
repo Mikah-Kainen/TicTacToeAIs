@@ -23,30 +23,35 @@ namespace TikTakToe
 
         public Board[] GetChildren()
         {
-            throw new NotImplementedException();
+            List<Board> Children = new List<Board>();
+            for(int y = 0; y < CurrentGame.Length; y ++)
+            {
+                for(int x = 0; x < CurrentGame[y].Length; x ++)
+                {
+                    if(CurrentGame[y][x] == Players.None)
+                    {
+                        Players nextPlayer = NextPlayer[CurrentPlayer](this);
+                        Board nextBoard = new Board(CurrentGame, nextPlayer, NextPlayer);
+                        nextBoard[y][x] = nextPlayer;
+                        Children.Add(nextBoard);
+                    }
+                }
+            }
+            return Children.ToArray();
         }
 
-        public Board(Players[][] currentGame, Players currentPlayer)
+        public Dictionary<Players, Func<IGameState<Board>, Players>> NextPlayer;
+
+        public Board(Players[][] currentGame, Players currentPlayer, Dictionary<Players, Func<IGameState<Board>, Players>> nextPLayer)
         {
             CurrentGame = currentGame;
             CurrentPlayer = currentPlayer;
+            NextPlayer = nextPLayer;
         }
 
-        public Players[] this[int index]
+        public Board(int xSize, int ySize, Dictionary<Players, Func<IGameState<Board>, Players>> nextPLayer)
         {
-            get
-            {
-
-                return CurrentGame[index];
-            }
-            set
-            {
-                CurrentGame[index] = value;
-            }
-        }
-
-        public Board(int xSize, int ySize)
-        {
+            NextPlayer = nextPLayer;
             CurrentGame = new Players[ySize][];
 
             for (int y = 0; y < ySize; y++)
@@ -56,6 +61,18 @@ namespace TikTakToe
                 {
                     CurrentGame[y][x] = Players.None;
                 }
+            }
+        }
+
+        public Players[] this[int index]
+        {
+            get
+            {
+                return CurrentGame[index];
+            }
+            set
+            {
+                CurrentGame[index] = value;
             }
         }
 

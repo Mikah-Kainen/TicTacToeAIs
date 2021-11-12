@@ -25,14 +25,20 @@ namespace TikTakToe.ScreenStuff
         public Dictionary<Players, Color> PlayerColor = new Dictionary<Players, Color>()
         {
             [Players.None] = Color.White,
-            [Players.Player1] = Color.Gold,
-            [Players.Player2] = Color.Maroon,
+            [Players.Player1] = Color.Red,
+            [Players.Player2] = Color.Red,
+        };
+
+        public Dictionary<Players, Func<IGameState<Board>, Players>> NextPlayer = new Dictionary<Players, Func<IGameState<Board>, Players>>()
+        {
+            [Players.Player1] = state => Players.Player2,
+            [Players.Player2] = state => Players.Player1,
         };
 
         public PlayScreen()
         {
             Objects = new List<GameObject>();
-            CurrentBoard = new Board(3, 3);
+            CurrentBoard = new Board(3, 3, NextPlayer);
 
             Random = new Random(); 
 
