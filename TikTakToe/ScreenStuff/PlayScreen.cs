@@ -14,19 +14,14 @@ namespace TikTakToe.ScreenStuff
     public class PlayScreen : IScreen
     {
         public List<GameObject> Objects { get; set; }
-        public Board CurrentBoard { get; set; }
         public Random Random { get; set; }
-        public Player RedPlayer { get; set; }
-        public Player BluePlayer { get; set; }
-
-        private Player previousPlayer;
-        private Player nextPlayer;
+        public Node<Board> GameTree { get; set; }
 
         public Dictionary<Players, Color> PlayerColor = new Dictionary<Players, Color>()
         {
             [Players.None] = Color.White,
             [Players.Player1] = Color.Red,
-            [Players.Player2] = Color.Red,
+            [Players.Player2] = Color.Blue,
         };
 
         public Dictionary<Players, Func<IGameState<Board>, Players>> NextPlayer = new Dictionary<Players, Func<IGameState<Board>, Players>>()
@@ -35,37 +30,27 @@ namespace TikTakToe.ScreenStuff
             [Players.Player2] = state => Players.Player1,
         };
 
+        public Dictionary<Players, Player> GetPlayer { get; set; }
+
         public PlayScreen()
         {
             Objects = new List<GameObject>();
-            CurrentBoard = new Board(3, 3, NextPlayer);
 
-            Random = new Random(); 
+            Random = new Random();
 
-            RedPlayer = new BasicPlayer(Players.Player1, Random);
-            BluePlayer = new BasicPlayer(Players.Player2, Random);
-            previousPlayer = BluePlayer;
-            nextPlayer = RedPlayer;
+            GetPlayer = new Dictionary<Players, Player>();
+            GetPlayer.Add(Players.Player1, new BasicPlayer(Players.Player1, Random));
+            GetPlayer.Add(Players.Player2, new BasicPlayer(Players.Player2, Random));
 
-            CurrentBoard[1][1] = Players.Player1;
+            GameTree = new Node<Board>();
+            GameTree.Value = new Board(3, 3, NextPlayer);
+            GameTree.Value[1][1] = Players.Player1;
+
+            GameTree.BuildTree();
         }
 
         public void Update(GameTime gameTime)
         {
-            double[] simulatingOutputs = new double[]
-            {
-                0,
-                0,
-                0,
-
-                1,
-                0,
-                0,
-
-                0,
-                0,
-                0,
-            };
 
             Game1.InputManager.Update(gameTime);
             for (int i = 0; i < Objects.Count; i++)
@@ -74,30 +59,34 @@ namespace TikTakToe.ScreenStuff
             }
             if (Game1.InputManager.WasKeyPressed(Keys.Space))
             {
-                (int y, int x) selected = nextPlayer.SelectTile(CurrentBoard);
-                CurrentBoard[selected.y][selected.x] = nextPlayer.PlayerID;
-                if(CurrentBoard.DidPlayerWin(nextPlayer.PlayerID))
+                (int y, int x) selected = GetPlayer[GameTree.Value.CurrentPlayer].SelectTile(GameTree);
+                for(int i = 0; i < GameTree.Children.Count; i ++)
                 {
-                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[nextPlayer.PlayerID], Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                    if(GameTree.Children[i].Value[selected.y][selected.x] == GameTree.Value.CurrentPlayer)
+                    {
+                        GameTree = GameTree.Children[i];
+                        break;
+                    }
                 }
-                else if(!CurrentBoard.IsPlayable())
+                if(GameTree.Value.DidPlayerWin(GameTree.Value.CurrentPlayer))
+                {
+                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[GameTree.Value.CurrentPlayer], Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                }
+                else if(!GameTree.Value.IsPlayable())
                 {
                     Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[Players.None], Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
                 }
-                Player temp = nextPlayer;
-                nextPlayer = previousPlayer;
-                previousPlayer = temp;
             }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            for(int y = 0; y < CurrentBoard.Length; y ++)
+            for(int y = 0; y < GameTree.Value.Length; y ++)
             {
-                for(int x = 0; x < CurrentBoard[y].Length; x ++)
+                for(int x = 0; x < GameTree.Value[y].Length; x ++)
                 {
                     Vector2 Position = new Vector2(25 + 104 * x, 25 + 104 * y);
-                    spriteBatch.Draw(Game1.WhitePixel, Position, null, PlayerColor[CurrentBoard[y][x]], 0, Vector2.Zero, new Vector2(100, 100), SpriteEffects.None, 1);
+                    spriteBatch.Draw(Game1.WhitePixel, Position, null, PlayerColor[GameTree.Value[y][x]], 0, Vector2.Zero, new Vector2(100, 100), SpriteEffects.None, 1);
                 }
             }
             for(int i = 0; i < Objects.Count; i ++)

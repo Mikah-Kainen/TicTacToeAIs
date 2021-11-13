@@ -24,6 +24,8 @@ namespace TikTakToe
         public Board[] GetChildren()
         {
             List<Board> Children = new List<Board>();
+            if (IsTerminal) return Children.ToArray();
+
             for(int y = 0; y < CurrentGame.Length; y ++)
             {
                 for(int x = 0; x < CurrentGame[y].Length; x ++)
@@ -32,7 +34,7 @@ namespace TikTakToe
                     {
                         Players nextPlayer = NextPlayer[CurrentPlayer](this);
                         Board nextBoard = new Board(CurrentGame, nextPlayer, NextPlayer);
-                        nextBoard[y][x] = nextPlayer;
+                        nextBoard[y][x] = CurrentPlayer;
                         Children.Add(nextBoard);
                     }
                 }
@@ -44,7 +46,15 @@ namespace TikTakToe
 
         public Board(Players[][] currentGame, Players currentPlayer, Dictionary<Players, Func<IGameState<Board>, Players>> nextPLayer)
         {
-            CurrentGame = currentGame;
+            CurrentGame = new Players[currentGame.Length][];
+            for(int y = 0; y < currentGame.Length; y ++)
+            {
+                CurrentGame[y] = new Players[currentGame[y].Length];
+                for(int x = 0; x < currentGame.Length; x ++)
+                {
+                    CurrentGame[y][x] = currentGame[y][x];
+                }
+            }
             CurrentPlayer = currentPlayer;
             NextPlayer = nextPLayer;
         }

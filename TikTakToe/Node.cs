@@ -8,30 +8,23 @@ namespace TikTakToe
     public class Node<T> where T : IGameState<T>
     {
         public T Value { get; set; }
-        public List<Node<T>> Children 
-        { 
-            get
-            {
-                if(Value != null && children == null)
-                {
-                    children = new List<Node<T>>();
-                    T[] values = Value.GetChildren();
-                    for (int i = 0; i < values.Length; i++)
-                    {
-                        Node<T> child = new Node<T>();
-                        child.Value = values[i];
-                        var buildChildren = child.Children;
-                        children.Add(child);
-                    }
-                }
-                return children;
-            }
-        }
-        
-        private List<Node<T>> children;
-
+        public List<Node<T>> Children { get; set; }
         public Node()
         {
+        }
+
+        public void BuildTree()
+        {
+            if (Value == null) return;
+            Children = new List<Node<T>>();
+            T[] values = Value.GetChildren();
+            for (int i = 0; i < values.Length; i++)
+            {
+                Node<T> Child = new Node<T>();
+                Child.Value = values[i];
+                Child.BuildTree();
+                Children.Add(Child);
+            }
         }
 
         //public void SetChildren(T[] values)

@@ -14,15 +14,10 @@ namespace TikTakToe.PlayerTypes
             this.random = random;
         }
 
-        public override (int y, int x) SelectTile(Tree currentTree)
+        public override (int y, int x) SelectTile(Node<Board> currentTree)
         {
-            currentTree.Value;
+            return (1, 1);
         }
 
-        public void CreateTree(Board CurrentState)
-        {
-            Tree.Value = CurrentState;
-            var buildTree = Tree.Children;
-        }
     }
 }

@@ -16,6 +16,6 @@ namespace TikTakToe.PlayerTypes
             PlayerID = playerID;
         }
 
-        public abstract (int y, int x) SelectTile(Board currentGame);
+        public abstract (int y, int x) SelectTile(Node<Board> CurrentTree);
     }
 }
