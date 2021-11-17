@@ -24,8 +24,9 @@ namespace TikTakToe.ScreenStuff
             [Players.Player2] = Color.Blue,
         };
 
-        public Dictionary<Players, Func<IGameState<Board>, Players>> NextPlayer = new Dictionary<Players, Func<IGameState<Board>, Players>>()
+        public Dictionary<Players, Func<IGameState<Board>, Players>> GetNextPlayer = new Dictionary<Players, Func<IGameState<Board>, Players>>()
         {
+            [Players.None] = state => Players.Player1,
             [Players.Player1] = state => Players.Player2,
             [Players.Player2] = state => Players.Player1,
         };
@@ -39,11 +40,11 @@ namespace TikTakToe.ScreenStuff
             Random = new Random();
 
             GetPlayer = new Dictionary<Players, Player>();
-            GetPlayer.Add(Players.Player1, new BasicPlayer(Players.Player1, Random));
+            GetPlayer.Add(Players.Player1, new MiniMaxPlayer(Players.Player1, Random));
             GetPlayer.Add(Players.Player2, new BasicPlayer(Players.Player2, Random));
 
             GameTree = new Node<Board>();
-            GameTree.Value = new Board(3, 3, NextPlayer);
+            GameTree.Value = new Board(3, 3, GetNextPlayer);
             GameTree.Value[1][1] = Players.Player1;
 
             GameTree.BuildTree();
@@ -59,18 +60,18 @@ namespace TikTakToe.ScreenStuff
             }
             if (Game1.InputManager.WasKeyPressed(Keys.Space))
             {
-                (int y, int x) selected = GetPlayer[GameTree.Value.CurrentPlayer].SelectTile(GameTree);
+                (int y, int x) selected = GetPlayer[GameTree.Value.NextPlayer].SelectTile(GameTree);
                 for(int i = 0; i < GameTree.Children.Count; i ++)
                 {
-                    if(GameTree.Children[i].Value[selected.y][selected.x] == GameTree.Value.CurrentPlayer)
+                    if(GameTree.Children[i].Value[selected.y][selected.x] == GameTree.Value.NextPlayer)
                     {
                         GameTree = GameTree.Children[i];
                         break;
                     }
                 }
-                if(GameTree.Value.DidPlayerWin(GameTree.Value.CurrentPlayer))
+                if(GameTree.Value.IsWin)
                 {
-                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[GameTree.Value.CurrentPlayer], Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[GameTree.Value.PreviousPlayer], Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
                 }
                 else if(!GameTree.Value.IsPlayable())
                 {
