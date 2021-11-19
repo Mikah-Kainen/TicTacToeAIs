@@ -26,7 +26,7 @@ namespace TikTakToe.ScreenStuff
 
         public Dictionary<Players, Func<IGameState<Board>, Players>> GetNextPlayer = new Dictionary<Players, Func<IGameState<Board>, Players>>()
         {
-            [Players.None] = state => Players.Player1,
+            [Players.None] = state => Players.Player2,
             [Players.Player1] = state => Players.Player2,
             [Players.Player2] = state => Players.Player1,
         };
@@ -41,11 +41,10 @@ namespace TikTakToe.ScreenStuff
 
             GetPlayer = new Dictionary<Players, Player>();
             GetPlayer.Add(Players.Player1, new MiniMaxPlayer(Players.Player1, Random));
-            GetPlayer.Add(Players.Player2, new BasicPlayer(Players.Player2, Random));
+            GetPlayer.Add(Players.Player2, new MiniMaxPlayer(Players.Player2, Random));
 
             GameTree = new Node<Board>();
             GameTree.Value = new Board(3, 3, GetNextPlayer);
-            GameTree.Value[1][1] = Players.Player1;
 
             GameTree.BuildTree();
         }

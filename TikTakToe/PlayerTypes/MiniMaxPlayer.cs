@@ -21,6 +21,24 @@ namespace TikTakToe.PlayerTypes
             int largestValue = 0;
             (int, int) minimizerMove = (0, 0);
             (int, int) maximizerMove = (0, 0);
+            int start = random.Next(0, 9);
+            for (int i = 0; i < 9; i++)
+            {
+                if (start == 9)
+                {
+                    start = 0;
+                }
+                int y = start / 3;
+                int x = start % 3;
+                if (currentTree.Value[y][x] == Players.None)
+                {
+                    minimizerMove = (y, x);
+                    maximizerMove = (y, x);
+                    break;
+                }
+                start++;
+            }
+
             Players maximizer = Players.Player1;
             Players minimizer = Players.Player2;
             for (int i = 0; i < values.Length; i ++)
@@ -51,7 +69,7 @@ namespace TikTakToe.PlayerTypes
 
         public int GetValue(Node<Board> Current, Players maximizer, Players minimizer)
         {
-            if(Current.Children.Count == 0 || Current.Value.IsTerminal)
+            if(Current.Value.IsTerminal)
             {
                 Players winner = Current.Value.GetWinner();
                 if(winner == maximizer)
