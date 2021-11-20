@@ -10,7 +10,8 @@ namespace TikTakToe
         public bool IsTie { get; }
         public bool IsLose { get; }
         public bool IsTerminal { get; }
-
+        public Players NextPlayer { get; }
+        public Players GetWinner();
         public T[] GetChildren();
 
     }

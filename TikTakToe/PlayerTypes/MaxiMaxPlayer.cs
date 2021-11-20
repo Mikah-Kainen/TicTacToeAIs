@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace TikTakToe.PlayerTypes
 {
-    public class MiniMaxPlayer : Player
+    class MaxiMaxPlayer : Player
     {
         private Random random;
-        public MiniMaxPlayer(Players playerID, Random random)
+        public MaxiMaxPlayer(Players playerID, Random random)
             : base(playerID)
         {
             this.random = random;
@@ -39,7 +38,7 @@ namespace TikTakToe.PlayerTypes
                 start++;
             }
 
-            for (int i = 0; i < values.Length; i ++)
+            for (int i = 0; i < values.Length; i++)
             {
                 values[i] = currentTree.Children[i].Value;
                 if (values[i] < smallestValue)
@@ -54,7 +53,7 @@ namespace TikTakToe.PlayerTypes
                 }
             }
 
-            if(largestValue == currentTree.Value)
+            if (largestValue == currentTree.Value)
             {
                 return maximizerMove;
             }

@@ -19,7 +19,7 @@ namespace TikTakToe.PlayerTypes
 
         public override (int y, int x) SelectTile(Node<Board> CurrentTree)
         {
-            Board currentGame = CurrentTree.Value;
+            Board currentGame = CurrentTree.State;
             for (int y = 0; y < currentGame.Length; y++)
             {
                 for (int x = 0; x < currentGame[y].Length; x++)
