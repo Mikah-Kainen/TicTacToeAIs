@@ -22,10 +22,10 @@ namespace TikTakToe
 
         public bool IsTerminal => IsWin || IsTie || IsLose;
 
-        public Board[] GetChildren()
+        public List<Node<Board>> GetChildren()
         {
-            List<Board> Children = new List<Board>();
-            if (IsTerminal) return Children.ToArray();
+            List<Node<Board>> children = new List<Node<Board>>();
+            if (IsTerminal) return children;
 
             for(int y = 0; y < CurrentGame.Length; y ++)
             {
@@ -35,11 +35,13 @@ namespace TikTakToe
                     {
                         Board nextBoard = new Board(CurrentGame, NextPlayer, GetNextPlayer);
                         nextBoard[y][x] = NextPlayer;
-                        Children.Add(nextBoard);
+                        Node<Board> currentChild = new Node<Board>();
+                        currentChild.State = nextBoard;
+                        children.Add(currentChild);
                     }
                 }
             }
-            return Children.ToArray();
+            return children;
         }
 
         public Dictionary<Players, Func<IGameState<Board>, Players>> GetNextPlayer;
@@ -50,7 +52,7 @@ namespace TikTakToe
             for(int y = 0; y < currentGame.Length; y ++)
             {
                 CurrentGame[y] = new Players[currentGame[y].Length];
-                for(int x = 0; x < currentGame.Length; x ++)
+                for(int x = 0; x < currentGame[y].Length; x ++)
                 {
                     CurrentGame[y][x] = currentGame[y][x];
                 }
@@ -164,129 +166,6 @@ namespace TikTakToe
             }
             return (0, 0);
         }
-
-        //public bool DidPlayerWin(Players currentPlayer)
-        //{
-        //    for (int y = 0; y < CurrentGame.Length; y++)
-        //    {
-        //        for (int x = 0; x < CurrentGame[y].Length; x++)
-        //        {
-        //            bool canMoveRight = x + 2 < CurrentGame[y].Length;
-        //            bool canMoveLeft = x - 2 >= 0;
-        //            bool canMoveDown = y + 2 < CurrentGame.Length;
-        //            if (CurrentGame[y][x] == currentPlayer)
-        //            {
-        //                if (canMoveRight)
-        //                {
-        //                    if (CurrentGame[y][x + 1] == currentPlayer && CurrentGame[y][x + 2] == currentPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                    else if (CurrentGame[y][x + 1] == currentPlayer && CurrentGame[y][x + 2] == currentPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                }
-        //                if (canMoveDown)
-        //                {
-        //                    if (CurrentGame[y + 1][x] == currentPlayer && CurrentGame[y + 2][x] == currentPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                    else if (CurrentGame[y + 1][x] == currentPlayer && CurrentGame[y + 2][x] == currentPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                }
-        //                if (canMoveDown && canMoveRight)
-        //                {
-        //                    if (CurrentGame[y + 1][x + 1] == currentPlayer && CurrentGame[y + 2][x + 2] == currentPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                    else if (CurrentGame[y + 1][x + 1] == currentPlayer && CurrentGame[y + 2][x + 2] == currentPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                }
-        //                if (canMoveDown && canMoveLeft)
-        //                {
-        //                    if (CurrentGame[y + 1][x - 1] == currentPlayer && CurrentGame[y + 2][x - 2] == currentPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                    else if (CurrentGame[y + 1][x - 1] == currentPlayer && CurrentGame[y + 2][x - 2] == currentPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return false;
-        //}
-
-        //public bool DidPlayerLose(Players currentPlayer)
-        //{
-        //    for (int y = 0; y < CurrentGame.Length; y++)
-        //    {
-        //        for (int x = 0; x < CurrentGame[y].Length; x++)
-        //        {
-        //            bool canMoveRight = x + 2 < CurrentGame[y].Length;
-        //            bool canMoveLeft = x - 2 >= 0;
-        //            bool canMoveDown = y + 2 < CurrentGame.Length;
-        //            if (CurrentGame[y][x] != currentPlayer && CurrentGame[y][x] != Players.None)
-        //            {
-        //                Players enemyPlayer = CurrentGame[y][x];
-        //                if (canMoveRight)
-        //                {
-        //                    if (CurrentGame[y][x + 1] == enemyPlayer && CurrentGame[y][x + 2] == enemyPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                    else if (CurrentGame[y][x + 1] == enemyPlayer && CurrentGame[y][x + 2] == enemyPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                }
-        //                if (canMoveDown)
-        //                {
-        //                    if (CurrentGame[y + 1][x] == enemyPlayer && CurrentGame[y + 2][x] == enemyPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                    else if (CurrentGame[y + 1][x] == enemyPlayer && CurrentGame[y + 2][x] == enemyPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                }
-        //                if (canMoveDown && canMoveRight)
-        //                {
-        //                    if (CurrentGame[y + 1][x + 1] == enemyPlayer && CurrentGame[y + 2][x + 2] == enemyPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                    else if (CurrentGame[y + 1][x + 1] == enemyPlayer && CurrentGame[y + 2][x + 2] == enemyPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                }
-        //                if (canMoveDown && canMoveLeft)
-        //                {
-        //                    if (CurrentGame[y + 1][x - 1] == enemyPlayer && CurrentGame[y + 2][x - 2] == enemyPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                    else if (CurrentGame[y + 1][x - 1] == enemyPlayer && CurrentGame[y + 2][x - 2] == enemyPlayer)
-        //                    {
-        //                        return true;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return false;
-        //}
 
 
         public bool IsPlayable()

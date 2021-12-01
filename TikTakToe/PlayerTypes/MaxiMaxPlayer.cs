@@ -18,7 +18,6 @@ namespace TikTakToe.PlayerTypes
         private void SetValues(Node<Board> currentTree)
         {
             Board State = currentTree.State;
-            Players currentPlayer = State.NextPlayer;
             GetPlayerValue.Add(currentTree, new Dictionary<Players, int>());
             if (State.IsTerminal)
             {

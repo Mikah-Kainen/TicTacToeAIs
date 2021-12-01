@@ -27,16 +27,12 @@ namespace TikTakToe
 
         private void BuildTree()
         {
-            Children = new List<Node<T>>();
-            T[] values = State.GetChildren();
+            Children = State.GetChildren();
             if (!State.IsTerminal)
             {
-                for (int i = 0; i < values.Length; i++)
+                for (int i = 0; i < Children.Count; i++)
                 {
-                    Node<T> Child = new Node<T>();
-                    Child.State = values[i];
-                    Child.BuildTree();
-                    Children.Add(Child);
+                    Children[i].BuildTree();
                 }
             }
         }

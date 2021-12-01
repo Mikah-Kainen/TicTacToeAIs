@@ -12,7 +12,8 @@ namespace TikTakToe
         public bool IsTerminal { get; }
         public Players NextPlayer { get; }
         public Players GetWinner();
-        public T[] GetChildren();
+        
+        public List<Node<T>> GetChildren();
 
     }
 }

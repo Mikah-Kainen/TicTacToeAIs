@@ -46,11 +46,11 @@ namespace TikTakToe.ScreenStuff
             GetPlayer = new Dictionary<Players, Player>();
             //GetPlayer.Add(Players.Player1, new MiniMaxPlayer(Players.Player1, Players.Player2, Random));
             GetPlayer.Add(Players.Player2, new MaxiMaxPlayer(Players.Player2, activePlayers, Random));
-            GetPlayer.Add(Players.Player1, new BasicPlayer(Players.Player1, Random));
+            GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player1, activePlayers, Random));
 
             GameTree = new Node<Board>();
 
-            GameTree.CreateTree(new Board(4, 4, GetNextPlayer));
+            GameTree.CreateTree(new Board(3, 3, GetNextPlayer));
         }
 
         public void Update(GameTime gameTime)
