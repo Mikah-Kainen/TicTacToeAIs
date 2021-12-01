@@ -8,15 +8,75 @@ namespace TikTakToe.PlayerTypes
     public class MiniMaxPlayer : Player
     {
         private Random random;
-        public MiniMaxPlayer(Players playerID, Random random)
+        private Players opponentID;
+        public MiniMaxPlayer(Players playerID, Players opponentID, Random random)
             : base(playerID)
         {
             this.random = random;
+            this.opponentID = opponentID;
+        }
+
+        private int SetValues(Node<Board> currentTree, Players maximizer, Players minimizer)
+        {
+            Board State = currentTree.State;
+            GetPlayerValue.Add(currentTree, new Dictionary<Players, int>());
+            if (State.IsTerminal)
+            {
+                Players winner = State.GetWinner();
+                if (winner == maximizer)
+                {
+                    GetPlayerValue[currentTree].Add(maximizer, 1);
+                    GetPlayerValue[currentTree].Add(minimizer, 1);
+                    return 1;
+                }
+                else if (winner == minimizer)
+                {
+                    GetPlayerValue[currentTree].Add(maximizer, -1);
+                    GetPlayerValue[currentTree].Add(minimizer, -1);
+                    return -1;
+                }
+                else
+                {
+                    GetPlayerValue[currentTree].Add(maximizer, 0);
+                    GetPlayerValue[currentTree].Add(minimizer, 0);
+                    return 0;
+                }
+            }
+            int smallestValue = int.MaxValue;
+            int largestValue = int.MinValue;
+            for (int i = 0; i < currentTree.Children.Count; i++)
+            {
+                int temp = SetValues(currentTree.Children[i], maximizer, minimizer);
+                if (temp < smallestValue)
+                {
+                    smallestValue = temp;
+                }
+                if (temp > largestValue)
+                {
+                    largestValue = temp;
+                }
+            }
+            if (State.NextPlayer == maximizer)
+            {
+                GetPlayerValue[currentTree].Add(maximizer, largestValue);
+                GetPlayerValue[currentTree].Add(minimizer, largestValue);
+                return largestValue;
+            }
+            else
+            {
+                GetPlayerValue[currentTree].Add(maximizer, smallestValue);
+                GetPlayerValue[currentTree].Add(minimizer, smallestValue);
+                return smallestValue;
+            }
         }
 
         public override (int y, int x) SelectTile(Node<Board> currentTree)
         {
-            int[] values = new int[currentTree.Children.Count];
+            if(GetPlayerValue == null)
+            {
+                GetPlayerValue = new Dictionary<Node<Board>, Dictionary<Players, int>>();
+                SetValues(currentTree, PlayerID, opponentID);
+            }
             int smallestValue = int.MaxValue;
             int largestValue = int.MinValue;
             (int, int) minimizerMove = (0, 0);
@@ -39,22 +99,22 @@ namespace TikTakToe.PlayerTypes
                 start++;
             }
 
-            for (int i = 0; i < values.Length; i ++)
+            for (int i = 0; i < currentTree.Children.Count; i ++)
             {
-                values[i] = currentTree.Children[i].Value;
-                if (values[i] < smallestValue)
+                int temp = GetPlayerValue[currentTree.Children[i]][currentTree.Children[i].State.NextPlayer];
+                if (temp < smallestValue)
                 {
-                    smallestValue = values[i];
+                    smallestValue = temp;
                     minimizerMove = currentTree.State.FindDifference(currentTree.Children[i].State);
                 }
-                if (values[i] > largestValue)
+                if (temp > largestValue)
                 {
-                    largestValue = values[i];
+                    largestValue = temp;
                     maximizerMove = currentTree.State.FindDifference(currentTree.Children[i].State);
                 }
             }
 
-            if(largestValue == currentTree.Value)
+            if(largestValue == GetPlayerValue[currentTree][currentTree.State.NextPlayer])
             {
                 return maximizerMove;
             }
