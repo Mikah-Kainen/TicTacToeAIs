@@ -37,50 +37,5 @@ namespace TikTakToe
             }
         }
 
-        //private int SetValues(Players maximizer, Players minimizer)
-        //{
-        //    if (State.IsTerminal)
-        //    {
-        //        Players winner = State.GetWinner();
-        //        if (winner == maximizer)
-        //        {
-        //            return 1;
-        //        }
-        //        else if (winner == minimizer)
-        //        {
-        //            return -1;
-        //        }
-        //        else
-        //        {
-        //            return 0;
-        //        }
-        //    }
-        //    int[] values = new int[Children.Count];
-        //    int smallestValue = int.MaxValue;
-        //    int largestValue = int.MinValue;
-        //    for (int i = 0; i < Children.Count; i++)
-        //    {
-        //        values[i] = Children[i].SetValues(maximizer, minimizer);
-        //        if (values[i] < smallestValue)
-        //        {
-        //            smallestValue = values[i];
-        //        }
-        //        if (values[i] > largestValue)
-        //        {
-        //            largestValue = values[i];
-        //        }
-        //    }
-        //    if (State.NextPlayer == maximizer)
-        //    {
-        //        Value = largestValue;
-        //        return largestValue;
-        //    }
-        //    else
-        //    {
-        //        Value = smallestValue;
-        //        return smallestValue;
-        //    }
-        //}
-
     }
 }

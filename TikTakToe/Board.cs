@@ -14,13 +14,13 @@ namespace TikTakToe
         public int Length => CurrentGame.Length;
         public Players PreviousPlayer { get; set; }
         public Players NextPlayer => GetNextPlayer[PreviousPlayer](this);
-        public bool IsWin => GetWinner() != Players.None && GetWinner() == PreviousPlayer;
+        public bool IsWin { get; private set; }
 
-        public bool IsTie => !IsPlayable() && !IsWin && !IsLose;
+        public bool IsTie { get; private set; }
 
-        public bool IsLose => GetWinner() != Players.None && GetWinner() != PreviousPlayer;
+        public bool IsLose { get; private set; }
 
-        public bool IsTerminal => IsWin || IsTie || IsLose;
+        public bool IsTerminal { get; private set; }
 
         public List<Node<Board>> GetChildren()
         {
@@ -35,6 +35,12 @@ namespace TikTakToe
                     {
                         Board nextBoard = new Board(CurrentGame, NextPlayer, GetNextPlayer);
                         nextBoard[y][x] = NextPlayer;
+                        Players winner = nextBoard.GetWinner();
+                        nextBoard.IsWin = winner != Players.None && winner == nextBoard.PreviousPlayer;
+                        nextBoard.IsLose = winner != Players.None && winner != nextBoard.PreviousPlayer;
+                        nextBoard.IsTie = !nextBoard.IsPlayable() && !nextBoard.IsWin && !nextBoard.IsLose;
+                        nextBoard.IsTerminal = nextBoard.IsWin || nextBoard.IsTie || nextBoard.IsLose;
+
                         Node<Board> currentChild = new Node<Board>();
                         currentChild.State = nextBoard;
                         children.Add(currentChild);

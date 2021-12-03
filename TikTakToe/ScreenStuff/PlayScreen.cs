@@ -50,7 +50,7 @@ namespace TikTakToe.ScreenStuff
 
             GameTree = new Node<Board>();
 
-            GameTree.CreateTree(new Board(3, 3, GetNextPlayer));
+            GameTree.CreateTree(new Board(4, 4, GetNextPlayer));
         }
 
         public void Update(GameTime gameTime)
