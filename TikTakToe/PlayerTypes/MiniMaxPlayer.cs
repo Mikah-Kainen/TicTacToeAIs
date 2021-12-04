@@ -5,10 +5,12 @@ using System.Text;
 
 namespace TikTakToe.PlayerTypes
 {
-    public class MiniMaxPlayer : Player
+    public class MiniMaxPlayer : Player, IMiniMaxPlayer
     {
         private Random random;
         private Players opponentID;
+        private Players maximizer => PlayerID;
+        private Players minimizer => opponentID;
         public MiniMaxPlayer(Players playerID, Players opponentID, Random random)
             : base(playerID)
         {
@@ -16,7 +18,7 @@ namespace TikTakToe.PlayerTypes
             this.opponentID = opponentID;
         }
 
-        private int SetValues(Node<Board> currentTree, Players maximizer, Players minimizer)
+        public void SetValues(Node<Board> currentTree)
         {
             Board State = currentTree.State;
             GetPlayerValue.Add(currentTree, new Dictionary<Players, int>());
@@ -27,26 +29,27 @@ namespace TikTakToe.PlayerTypes
                 {
                     GetPlayerValue[currentTree].Add(maximizer, 1);
                     GetPlayerValue[currentTree].Add(minimizer, 1);
-                    return 1;
+                    return;
                 }
                 else if (winner == minimizer)
                 {
                     GetPlayerValue[currentTree].Add(maximizer, -1);
                     GetPlayerValue[currentTree].Add(minimizer, -1);
-                    return -1;
+                    return;
                 }
                 else
                 {
                     GetPlayerValue[currentTree].Add(maximizer, 0);
                     GetPlayerValue[currentTree].Add(minimizer, 0);
-                    return 0;
+                    return;
                 }
             }
             int smallestValue = int.MaxValue;
             int largestValue = int.MinValue;
             for (int i = 0; i < currentTree.Children.Count; i++)
             {
-                int temp = SetValues(currentTree.Children[i], maximizer, minimizer);
+                SetValues(currentTree.Children[i]);
+                int temp = GetPlayerValue[currentTree.Children[i]][currentTree.State.NextPlayer];
                 if (temp < smallestValue)
                 {
                     smallestValue = temp;
@@ -60,23 +63,18 @@ namespace TikTakToe.PlayerTypes
             {
                 GetPlayerValue[currentTree].Add(maximizer, largestValue);
                 GetPlayerValue[currentTree].Add(minimizer, largestValue);
-                return largestValue;
+                return;
             }
             else
             {
                 GetPlayerValue[currentTree].Add(maximizer, smallestValue);
                 GetPlayerValue[currentTree].Add(minimizer, smallestValue);
-                return smallestValue;
+                return;
             }
         }
 
         public override (int y, int x) SelectTile(Node<Board> currentTree)
         {
-            if(GetPlayerValue == null)
-            {
-                GetPlayerValue = new Dictionary<Node<Board>, Dictionary<Players, int>>();
-                SetValues(currentTree, PlayerID, opponentID);
-            }
             int smallestValue = int.MaxValue;
             int largestValue = int.MinValue;
             (int, int) minimizerMove = (0, 0);

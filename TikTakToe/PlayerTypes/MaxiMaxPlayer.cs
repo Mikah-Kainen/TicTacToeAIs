@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TikTakToe.PlayerTypes
 {
-    class MaxiMaxPlayer : Player
+    class MaxiMaxPlayer : Player, IMiniMaxPlayer
     {
         private Random random;
         private List<Players> activePlayers;
@@ -15,7 +15,7 @@ namespace TikTakToe.PlayerTypes
             this.activePlayers = activePlayers;
         }
 
-        private void SetValues(Node<Board> currentTree)
+        public void SetValues(Node<Board> currentTree)
         {
             Board State = currentTree.State;
             GetPlayerValue.Add(currentTree, new Dictionary<Players, int>());
@@ -68,11 +68,6 @@ namespace TikTakToe.PlayerTypes
 
         public override (int y, int x) SelectTile(Node<Board> currentTree)
         {
-            if (GetPlayerValue == null)
-            {
-                GetPlayerValue = new Dictionary<Node<Board>, Dictionary<Players, int>>();
-                SetValues(currentTree);
-            }
             int largestValue = int.MinValue;
             (int, int) maximizerMove = (0, 0);
             int start = random.Next(0, 9);

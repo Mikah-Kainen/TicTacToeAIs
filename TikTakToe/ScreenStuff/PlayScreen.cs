@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using TikTakToe.DrawStuff;
@@ -50,7 +51,30 @@ namespace TikTakToe.ScreenStuff
 
             GameTree = new Node<Board>();
 
-            GameTree.CreateTree(new Board(4, 4, GetNextPlayer));
+            int firstMoveY = Random.Next(0, 4);
+            int firstMoveX = Random.Next(0, 1);
+            int secondMoveY = Random.Next(0, 4);
+            int secondMoveX = Random.Next(1, 2);
+            int thirdMoveY = Random.Next(0, 4);
+            int thirdMoveX = Random.Next(2, 3);
+            int fourthMoveY = Random.Next(0, 4);
+            int fourthMoveX = Random.Next(3, 4);
+
+            GameTree.State = new Board(4, 4, GetNextPlayer);
+            GameTree.State[firstMoveY][firstMoveX] = Players.Player2;
+            GameTree.State[secondMoveY][secondMoveX] = Players.Player1;
+            GameTree.State[thirdMoveY][thirdMoveX] = Players.Player2;
+            GameTree.State[fourthMoveY][fourthMoveX] = Players.Player1;
+
+            GameTree.CreateTree(GameTree.State);
+            foreach (Players player in activePlayers)
+            {
+                if (GetPlayer[player] is IMiniMaxPlayer currentPlayer)
+                {
+                    currentPlayer.GetPlayerValue = new Dictionary<Node<Board>, Dictionary<Players, int>>();
+                    currentPlayer.SetValues(GameTree);
+                }
+            }
         }
 
         public void Update(GameTime gameTime)

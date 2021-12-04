@@ -36,7 +36,8 @@ namespace TikTakToe.ScreenStuff
 
         public void Clear()
         {
-            PreviousScreens = new List<IScreen>();
+            PreviousScreens.Clear();
+            GC.Collect();
         }
     }
 }
