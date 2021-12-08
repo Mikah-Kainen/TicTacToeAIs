@@ -10,6 +10,7 @@ namespace TikTakToe
 {
     public class Board : IGameState<Board>
     {
+        public int WinSize { get; set; }
         public Players[][] CurrentGame;
         public int Length => CurrentGame.Length;
         public Players PreviousPlayer { get; set; }
@@ -67,8 +68,9 @@ namespace TikTakToe
             GetNextPlayer = getNextPLayer;
         }
 
-        public Board(int xSize, int ySize, Dictionary<Players, Func<IGameState<Board>, Players>> getNextPLayer)
+        public Board(int xSize, int ySize, int winSize, Dictionary<Players, Func<IGameState<Board>, Players>> getNextPLayer)
         {
+            WinSize = winSize;
             GetNextPlayer = getNextPLayer;
             CurrentGame = new Players[ySize][];
 
@@ -102,14 +104,21 @@ namespace TikTakToe
             {
                 for (int x = 0; x < CurrentGame[y].Length; x++)
                 {
-                    bool canMoveRight = x + 2 < CurrentGame[y].Length;
-                    bool canMoveLeft = x - 2 >= 0;
-                    bool canMoveDown = y + 2 < CurrentGame.Length;
+                    int loopFactor = WinSize - 1;
+                    bool canMoveRight = x + loopFactor < CurrentGame[y].Length;
+                    bool canMoveLeft = x - loopFactor >= 0;
+                    bool canMoveDown = y + loopFactor < CurrentGame.Length;
                     Players currentPlayer = CurrentGame[y][x];
                     if(currentPlayer != Players.None)
                     { 
                         if (canMoveRight)
                         {
+                            bool looping = true;
+                            for (int i = 1; i < loopFactor; i ++)
+                            {
+                                looping = CurrentGame[y][x + i] == currentPlayer;
+                                //This doesn't work
+                            }
                             if (CurrentGame[y][x + 1] == currentPlayer && CurrentGame[y][x + 2] == currentPlayer)
                             {
                                 return currentPlayer;
