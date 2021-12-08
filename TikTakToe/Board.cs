@@ -113,54 +113,52 @@ namespace TikTakToe
                     { 
                         if (canMoveRight)
                         {
-                            bool looping = true;
                             for (int i = 1; i < loopFactor; i ++)
                             {
-                                looping = CurrentGame[y][x + i] == currentPlayer;
-                                //This doesn't work
+                                if(CurrentGame[y][x + i] != currentPlayer)
+                                {
+                                    goto end1;
+                                }
                             }
-                            if (CurrentGame[y][x + 1] == currentPlayer && CurrentGame[y][x + 2] == currentPlayer)
-                            {
-                                return currentPlayer;
-                            }
-                            else if (CurrentGame[y][x + 1] == currentPlayer && CurrentGame[y][x + 2] == currentPlayer)
-                            {
-                                return currentPlayer;
-                            }
+                            return currentPlayer;
                         }
+                        end1:
                         if (canMoveDown)
                         {
-                            if (CurrentGame[y + 1][x] == currentPlayer && CurrentGame[y + 2][x] == currentPlayer)
+                            for (int i = 1; i < loopFactor; i++)
                             {
-                                return currentPlayer;
+                                if (CurrentGame[y + i][x] != currentPlayer)
+                                {
+                                    goto end2;
+                                }
                             }
-                            else if (CurrentGame[y + 1][x] == currentPlayer && CurrentGame[y + 2][x] == currentPlayer)
-                            {
-                                return currentPlayer;
-                            }
+                            return currentPlayer;
                         }
+                        end2:
                         if (canMoveDown && canMoveRight)
                         {
-                            if (CurrentGame[y + 1][x + 1] == currentPlayer && CurrentGame[y + 2][x + 2] == currentPlayer)
+                            for (int i = 1; i < loopFactor; i++)
                             {
-                                return currentPlayer;
+                                if (CurrentGame[y + i][x + i] != currentPlayer)
+                                {
+                                    goto end3;
+                                }
                             }
-                            else if (CurrentGame[y + 1][x + 1] == currentPlayer && CurrentGame[y + 2][x + 2] == currentPlayer)
-                            {
-                                return currentPlayer;
-                            }
+                            return currentPlayer;
                         }
+                        end3:
                         if (canMoveDown && canMoveLeft)
                         {
-                            if (CurrentGame[y + 1][x - 1] == currentPlayer && CurrentGame[y + 2][x - 2] == currentPlayer)
+                            for (int i = 1; i < loopFactor; i++)
                             {
-                                return currentPlayer;
+                                if (CurrentGame[y + i][x - i] != currentPlayer)
+                                {
+                                    goto end4;
+                                }
                             }
-                            else if (CurrentGame[y + 1][x - 1] == currentPlayer && CurrentGame[y + 2][x - 2] == currentPlayer)
-                            {
-                                return currentPlayer;
-                            }
+                            return currentPlayer;
                         }
+                        end4:
                     }
                 }
             }
