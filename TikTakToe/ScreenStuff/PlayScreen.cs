@@ -47,7 +47,7 @@ namespace TikTakToe.ScreenStuff
             GetPlayer = new Dictionary<Players, Player>();
             //GetPlayer.Add(Players.Player1, new MiniMaxPlayer(Players.Player1, Players.Player2, Random));
             GetPlayer.Add(Players.Player2, new MaxiMaxPlayer(Players.Player2, activePlayers, Random));
-            GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player1, activePlayers, Random));
+            GetPlayer.Add(Players.Player1, new BasicPlayer(Players.Player1, Random));
 
             GameTree = new Node<Board>();
 
@@ -67,7 +67,7 @@ namespace TikTakToe.ScreenStuff
             GameTree.State[0][3] = Players.Player1;
             GameTree.State[1][0] = Players.Player2;
             GameTree.State[2][0] = Players.Player1;
-            GameTree.State[1][2] = Players.Player1;
+            //          GameTree.State[1][2] = Players.Player1;
             //GameTree.State[firstMoveY][firstMoveX] = Players.Player2;
             //GameTree.State[secondMoveY][secondMoveX] = Players.Player1;
             //GameTree.State[thirdMoveY][thirdMoveX] = Players.Player2;

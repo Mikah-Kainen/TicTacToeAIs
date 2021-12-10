@@ -34,7 +34,7 @@ namespace TikTakToe
                 {
                     if(CurrentGame[y][x] == Players.None)
                     {
-                        Board nextBoard = new Board(CurrentGame, NextPlayer, GetNextPlayer);
+                        Board nextBoard = new Board(CurrentGame, NextPlayer, WinSize, GetNextPlayer);
                         nextBoard[y][x] = NextPlayer;
                         Players winner = nextBoard.GetWinner();
                         nextBoard.IsWin = winner != Players.None && winner == nextBoard.PreviousPlayer;
@@ -53,8 +53,9 @@ namespace TikTakToe
 
         public Dictionary<Players, Func<IGameState<Board>, Players>> GetNextPlayer;
 
-        public Board(Players[][] currentGame, Players previousPlayer, Dictionary<Players, Func<IGameState<Board>, Players>> getNextPLayer)
+        public Board(Players[][] currentGame, Players previousPlayer, int winSize, Dictionary<Players, Func<IGameState<Board>, Players>> getNextPLayer)
         {
+            WinSize = winSize;
             CurrentGame = new Players[currentGame.Length][];
             for(int y = 0; y < currentGame.Length; y ++)
             {
@@ -104,16 +105,15 @@ namespace TikTakToe
             {
                 for (int x = 0; x < CurrentGame[y].Length; x++)
                 {
-                    int loopFactor = WinSize - 1;
-                    bool canMoveRight = x + loopFactor < CurrentGame[y].Length;
-                    bool canMoveLeft = x - loopFactor >= 0;
-                    bool canMoveDown = y + loopFactor < CurrentGame.Length;
+                    bool canMoveRight = x + WinSize - 1 < CurrentGame[y].Length;
+                    bool canMoveLeft = x - WinSize + 1 >= 0;
+                    bool canMoveDown = y + WinSize - 1 < CurrentGame.Length;
                     Players currentPlayer = CurrentGame[y][x];
                     if(currentPlayer != Players.None)
                     { 
                         if (canMoveRight)
                         {
-                            for (int i = 1; i < loopFactor; i ++)
+                            for (int i = 1; i < WinSize; i ++)
                             {
                                 if(CurrentGame[y][x + i] != currentPlayer)
                                 {
@@ -125,7 +125,7 @@ namespace TikTakToe
                         end1:
                         if (canMoveDown)
                         {
-                            for (int i = 1; i < loopFactor; i++)
+                            for (int i = 1; i < WinSize; i++)
                             {
                                 if (CurrentGame[y + i][x] != currentPlayer)
                                 {
@@ -137,7 +137,7 @@ namespace TikTakToe
                         end2:
                         if (canMoveDown && canMoveRight)
                         {
-                            for (int i = 1; i < loopFactor; i++)
+                            for (int i = 1; i < WinSize; i++)
                             {
                                 if (CurrentGame[y + i][x + i] != currentPlayer)
                                 {
@@ -149,7 +149,7 @@ namespace TikTakToe
                         end3:
                         if (canMoveDown && canMoveLeft)
                         {
-                            for (int i = 1; i < loopFactor; i++)
+                            for (int i = 1; i < WinSize; i++)
                             {
                                 if (CurrentGame[y + i][x - i] != currentPlayer)
                                 {
@@ -159,6 +159,7 @@ namespace TikTakToe
                             return currentPlayer;
                         }
                         end4:
+                        if(true) { }
                     }
                 }
             }

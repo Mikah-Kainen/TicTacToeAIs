@@ -25,168 +25,296 @@ namespace TikTakToe.PlayerTypes
             {
                 for (int x = 0; x < currentGame[y].Length; x++)
                 {
-                    bool canMoveRight = x + 2 < currentGame[y].Length;
-                    bool canMoveLeft = x - 2 >= 0;
-                    bool canMoveDown = y + 2 < currentGame.Length;
-                    if (currentGame[y][x] == PlayerID)
+                    bool canMoveRight = x + currentGame.WinSize - 1 < currentGame[y].Length;
+                    bool canMoveLeft = x - currentGame.WinSize - 1 >= 0;
+                    bool canMoveDown = y + currentGame.WinSize - 1 < currentGame.Length;
+                    if (currentGame[y][x] == PlayerID || currentGame[y][x] == Players.None)
                     {
                         if (canMoveRight)
                         {
-                            if (currentGame[y][x + 1] == Players.None && currentGame[y][x + 2] == PlayerID)
+                            int playerCount = 0;
+                            int blankSquare = -1;
+                            for(int i = 0; i < currentGame.WinSize; i ++)
                             {
-                                return (y, x + 1);
+                                if(currentGame[y][x + i] == PlayerID)
+                                {
+                                    playerCount++;
+                                }
+                                else if(currentGame[y][x + i] == Players.None)
+                                {
+                                    if(blankSquare != -1)
+                                    {
+                                        playerCount = 0;
+                                        break;
+                                    }
+                                    blankSquare = i;
+                                }
+                                else
+                                {
+                                    playerCount = 0;
+                                    break;
+                                }
                             }
-                            else if (currentGame[y][x + 1] == PlayerID && currentGame[y][x + 2] == Players.None)
+                            if(playerCount == currentGame.WinSize - 1)
                             {
-                                return (y, x + 2);
+                                return (y, x + blankSquare);
                             }
                         }
                         if (canMoveDown)
                         {
-                            if (currentGame[y + 1][x] == Players.None && currentGame[y + 2][x] == PlayerID)
+                            int playerCount = 0;
+                            int blankSquare = -1;
+                            for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                return (y + 1, x);
+                                if (currentGame[y + i][x] == PlayerID)
+                                {
+                                    playerCount++;
+                                }
+                                else if (currentGame[y + i][x] == Players.None)
+                                {
+                                    if (blankSquare != -1)
+                                    {
+                                        playerCount = 0;
+                                        break;
+                                    }
+                                    blankSquare = i;
+                                }
+                                else
+                                {
+                                    playerCount = 0;
+                                    break;
+                                }
                             }
-                            else if (currentGame[y + 1][x] == PlayerID && currentGame[y + 2][x] == Players.None)
+                            if (playerCount == currentGame.WinSize - 1)
                             {
-                                return (y + 2, x);
+                                return (y + blankSquare, x);
                             }
                         }
                         if (canMoveDown && canMoveRight)
                         {
-                            if (currentGame[y + 1][x + 1] == Players.None && currentGame[y + 2][x + 2] == PlayerID)
+                            int playerCount = 0;
+                            int blankSquare = -1;
+                            for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                return (y + 1, x + 1);
+                                if (currentGame[y + i][x + i] == PlayerID)
+                                {
+                                    playerCount++;
+                                }
+                                else if (currentGame[y + i][x + i] == Players.None)
+                                {
+                                    if (blankSquare != -1)
+                                    {
+                                        playerCount = 0;
+                                        break;
+                                    }
+                                    blankSquare = i;
+                                }
+                                else
+                                {
+                                    playerCount = 0;
+                                    break;
+                                }
                             }
-                            else if (currentGame[y + 1][x + 1] == PlayerID && currentGame[y + 2][x + 2] == Players.None)
+                            if (playerCount == currentGame.WinSize - 1)
                             {
-                                return (y + 2, x + 2);
+                                return (y + blankSquare, x + blankSquare);
                             }
                         }
                         if (canMoveDown && canMoveLeft)
                         {
-                            if (currentGame[y + 1][x - 1] == Players.None && currentGame[y + 2][x - 2] == PlayerID)
+                            int playerCount = 0;
+                            int blankSquare = -1;
+                            for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                return (y + 1, x - 1);
+                                if (currentGame[y + i][x - i] == PlayerID)
+                                {
+                                    playerCount++;
+                                }
+                                else if (currentGame[y + i][x - i] == Players.None)
+                                {
+                                    if (blankSquare != -1)
+                                    {
+                                        playerCount = 0;
+                                        break;
+                                    }
+                                    blankSquare = i;
+                                }
+                                else
+                                {
+                                    playerCount = 0;
+                                    break;
+                                }
                             }
-                            else if (currentGame[y + 1][x - 1] == PlayerID && currentGame[y + 2][x - 2] == Players.None)
+                            if (playerCount == currentGame.WinSize - 1)
                             {
-                                return (y + 2, x - 2);
+                                return (y + blankSquare, x - blankSquare);
                             }
-                        }
-                    }
-                    else if (currentGame[y][x] == Players.None)
-                    {
-                        if (canMoveRight && currentGame[y][x + 1] == PlayerID && currentGame[y][x + 2] == PlayerID)
-                        {
-                            return (y, x);
-
-                        }
-                        if (canMoveDown && currentGame[y + 1][x] == PlayerID && currentGame[y + 2][x] == PlayerID)
-                        {
-                            return (y, x);
-
-                        }
-                        if (canMoveDown && canMoveRight && currentGame[y + 1][x + 1] == PlayerID && currentGame[y + 2][x + 2] == PlayerID)
-                        {
-                            return (y, x);
-
-                        }
-                        if (canMoveDown && canMoveLeft && currentGame[y + 1][x - 1] == PlayerID && currentGame[y + 2][x - 2] == PlayerID)
-                        {
-                            return (y, x);
-
                         }
                     }
                 }
             }
+
 
             for (int y = 0; y < currentGame.Length; y++)
             {
                 for (int x = 0; x < currentGame[y].Length; x++)
                 {
-                    bool canMoveRight = x + 2 < currentGame[y].Length;
-                    bool canMoveLeft = x - 2 >= 0;
-                    bool canMoveDown = y + 2 < currentGame.Length;
-                    if (currentGame[y][x] != PlayerID && currentGame[y][x] != Players.None)
+                    bool canMoveRight = x + currentGame.WinSize - 1 < currentGame[y].Length;
+                    bool canMoveLeft = x - currentGame.WinSize - 1 >= 0;
+                    bool canMoveDown = y + currentGame.WinSize - 1 < currentGame.Length;
+                    if (currentGame[y][x] != PlayerID)
                     {
-                        Players OpponentID = currentGame[y][x];
+                        Players currentPlayer = currentGame[y][x];
                         if (canMoveRight)
                         {
-                            if (currentGame[y][x + 1] == Players.None && currentGame[y][x + 2] == OpponentID)
+                            if(currentPlayer == Players.None)
                             {
-                                return (y, x + 1);
+                                currentPlayer = currentGame[y][x + 1];
                             }
-                            else if (currentGame[y][x + 1] == OpponentID && currentGame[y][x + 2] == Players.None)
+                            int playerCount = 0;
+                            int blankSquare = -1;
+                            for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                return (y, x + 2);
+                                if (currentGame[y][x + i] == currentPlayer)
+                                {
+                                    playerCount++;
+                                }
+                                else if (currentGame[y][x + i] == Players.None)
+                                {
+                                    if (blankSquare != -1)
+                                    {
+                                        playerCount = 0;
+                                        break;
+                                    }
+                                    blankSquare = i;
+                                }
+                                else
+                                {
+                                    playerCount = 0;
+                                    break;
+                                }
+                            }
+                            if (playerCount == currentGame.WinSize - 1)
+                            {
+                                return (y, x + blankSquare);
                             }
                         }
                         if (canMoveDown)
                         {
-                            if (currentGame[y + 1][x] == Players.None && currentGame[y + 2][x] == OpponentID)
+                            if (currentPlayer == Players.None)
                             {
-                                return (y + 1, x);
+                                currentPlayer = currentGame[y + 1][x];
                             }
-                            else if (currentGame[y + 1][x] == OpponentID && currentGame[y + 2][x] == Players.None)
+                            int playerCount = 0;
+                            int blankSquare = -1;
+                            for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                return (y + 2, x);
+                                if (currentGame[y + i][x] == currentPlayer)
+                                {
+                                    playerCount++;
+                                }
+                                else if (currentGame[y + i][x] == Players.None)
+                                {
+                                    if (blankSquare != -1)
+                                    {
+                                        playerCount = 0;
+                                        break;
+                                    }
+                                    blankSquare = i;
+                                }
+                                else
+                                {
+                                    playerCount = 0;
+                                    break;
+                                }
+                            }
+                            if (playerCount == currentGame.WinSize - 1)
+                            {
+                                return (y + blankSquare, x);
                             }
                         }
                         if (canMoveDown && canMoveRight)
                         {
-                            if (currentGame[y + 1][x + 1] == Players.None && currentGame[y + 2][x + 2] == OpponentID)
+                            if (currentPlayer == Players.None)
                             {
-                                return (y + 1, x + 1);
+                                currentPlayer = currentGame[y + 1][x + 1];
                             }
-                            else if (currentGame[y + 1][x + 1] == OpponentID && currentGame[y + 2][x + 2] == Players.None)
+                            int playerCount = 0;
+                            int blankSquare = -1;
+                            for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                return (y + 2, x + 2);
+                                if (currentGame[y + i][x + i] == currentPlayer)
+                                {
+                                    playerCount++;
+                                }
+                                else if (currentGame[y + i][x + i] == Players.None)
+                                {
+                                    if (blankSquare != -1)
+                                    {
+                                        playerCount = 0;
+                                        break;
+                                    }
+                                    blankSquare = i;
+                                }
+                                else
+                                {
+                                    playerCount = 0;
+                                    break;
+                                }
+                            }
+                            if (playerCount == currentGame.WinSize - 1)
+                            {
+                                return (y + blankSquare, x + blankSquare);
                             }
                         }
                         if (canMoveDown && canMoveLeft)
                         {
-                            if (currentGame[y + 1][x - 1] == Players.None && currentGame[y + 2][x - 2] == OpponentID)
+                            if (currentPlayer == Players.None)
                             {
-                                return (y + 1, x - 1);
+                                currentPlayer = currentGame[y + 1][x - 1];
                             }
-                            else if (currentGame[y + 1][x - 1] == OpponentID && currentGame[y + 2][x - 2] == Players.None)
+                            int playerCount = 0;
+                            int blankSquare = -1;
+                            for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                return (y + 2, x - 2);
+                                if (currentGame[y + i][x - i] == currentPlayer)
+                                {
+                                    playerCount++;
+                                }
+                                else if (currentGame[y + i][x - i] == Players.None)
+                                {
+                                    if (blankSquare != -1)
+                                    {
+                                        playerCount = 0;
+                                        break;
+                                    }
+                                    blankSquare = i;
+                                }
+                                else
+                                {
+                                    playerCount = 0;
+                                    break;
+                                }
                             }
-                        }
-                    }
-                    else if (currentGame[y][x] == Players.None)
-                    {
-                        if (canMoveRight && currentGame[y][x + 1] != Players.None && currentGame[y][x + 1] == currentGame[y][x + 2])
-                        {
-                            return (y, x);
-                        }
-                        if (canMoveDown && currentGame[y + 1][x] != Players.None && currentGame[y + 1][x] == currentGame[y + 2][x])
-                        {
-                            return (y, x);
-                        }
-                        if (canMoveDown && canMoveRight && currentGame[y + 1][x + 1] != Players.None && currentGame[y + 1][x + 1] == currentGame[y + 2][x + 2])
-                        {
-                            return (y, x);
-                        }
-                        if (canMoveDown && canMoveLeft && currentGame[y + 1][x - 1] != Players.None && currentGame[y + 1][x - 1] == currentGame[y + 2][x - 2])
-                        {
-                            return (y, x);
+                            if (playerCount == currentGame.WinSize - 1)
+                            {
+                                return (y + blankSquare, x - blankSquare);
+                            }
                         }
                     }
                 }
             }
 
-            int start = random.Next(0, 9);
-            for(int i = 0; i < 9; i ++)
+            int max = currentGame.Length * currentGame[0].Length;
+            int start = random.Next(0, max);
+            for(int i = 0; i < max; i ++)
             {
-                if(start == 9)
+                if(start == max)
                 {
                     start = 0;
                 }
-                int y = start / 3;
-                int x = start % 3;
+                int y = start / currentGame.Length;
+                int x = start % currentGame[0].Length;
                 if(currentGame[y][x] == Players.None)
                 {
                     return (y, x);
