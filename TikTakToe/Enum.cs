@@ -7,9 +7,10 @@ namespace TikTakToe
 
     public enum Players
     {
-        Player1,
-        Player2, 
         None,
+        Player1,
+        Player2,
+        Player3,
     };
 
     public enum PlayerColors

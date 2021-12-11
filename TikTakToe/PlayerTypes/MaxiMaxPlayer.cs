@@ -18,49 +18,53 @@ namespace TikTakToe.PlayerTypes
         public void SetValues(Node<Board> currentTree)
         {
             Board State = currentTree.State;
-            GetPlayerValue.Add(currentTree, new Dictionary<Players, int>());
-            if (State.IsTerminal)
+            int currentTreeValue = currentTree.State.Print();
+            if (!GetPlayerValue.ContainsKey(currentTreeValue))
             {
-                foreach (Players player in activePlayers)
+                GetPlayerValue.Add(currentTreeValue, new Dictionary<Players, int>());
+                if (State.IsTerminal)
                 {
-                    Players winner = State.GetWinner();
-                    if (winner == player)
+                    foreach (Players player in activePlayers)
                     {
-                        GetPlayerValue[currentTree].Add(player, 1);
-                    }
-                    else if (winner != player && winner != Players.None)
-                    {
-                        GetPlayerValue[currentTree].Add(player, -1);
-                    }
-                    else
-                    {
-                        GetPlayerValue[currentTree].Add(player, 0);
+                        Players winner = State.GetWinner();
+                        if (winner == player)
+                        {
+                            GetPlayerValue[currentTreeValue].Add(player, 1);
+                        }
+                        else if (winner != player && winner != Players.None)
+                        {
+                            GetPlayerValue[currentTreeValue].Add(player, -1);
+                        }
+                        else
+                        {
+                            GetPlayerValue[currentTreeValue].Add(player, 0);
+                        }
                     }
                 }
-            }
-            else
-            {
-                int largestValue = int.MinValue;
-                Node<Board> largestValueMove = null;
-                for (int i = 0; i < currentTree.Children.Count; i++)
+                else
                 {
-                    SetValues(currentTree.Children[i]);
-                    int temp = GetPlayerValue[currentTree.Children[i]][currentTree.State.NextPlayer];
-                    if (temp > largestValue)
+                    int largestValue = int.MinValue;
+                    Node<Board> largestValueMove = null;
+                    for (int i = 0; i < currentTree.Children.Count; i++)
                     {
-                        largestValue = temp;
-                        largestValueMove = currentTree.Children[i];
+                        SetValues(currentTree.Children[i]);
+                        int temp = GetPlayerValue[currentTree.Children[i].State.Print()][currentTree.State.NextPlayer];
+                        if (temp > largestValue)
+                        {
+                            largestValue = temp;
+                            largestValueMove = currentTree.Children[i];
+                        }
                     }
-                }
-                foreach (Players player in activePlayers)
-                {
-                    if (player == currentTree.State.NextPlayer)
+                    foreach (Players player in activePlayers)
                     {
-                        GetPlayerValue[currentTree].Add(player, largestValue);
-                    }
-                    else
-                    {
-                        GetPlayerValue[currentTree].Add(player, GetPlayerValue[largestValueMove][player]);
+                        if (player == currentTree.State.NextPlayer)
+                        {
+                            GetPlayerValue[currentTreeValue].Add(player, largestValue);
+                        }
+                        else
+                        {
+                            GetPlayerValue[currentTreeValue].Add(player, GetPlayerValue[largestValueMove.State.Print()][player]);
+                        }
                     }
                 }
             }
@@ -69,16 +73,17 @@ namespace TikTakToe.PlayerTypes
         public override (int y, int x) SelectTile(Node<Board> currentTree)
         {
             int largestValue = int.MinValue;
+            int max = currentTree.State.Length * currentTree.State[0].Length;
             (int, int) maximizerMove = (0, 0);
-            int start = random.Next(0, 9);
-            for (int i = 0; i < 9; i++)
+            int start = random.Next(0, max);
+            for (int i = 0; i < max; i++)
             {
-                if (start == 9)
+                if (start == max)
                 {
                     start = 0;
                 }
-                int y = start / 3;
-                int x = start % 3;
+                int y = start / currentTree.State.Length;
+                int x = start % currentTree.State[0].Length;
                 if (currentTree.State[y][x] == Players.None)
                 {
                     maximizerMove = (y, x);
@@ -89,7 +94,7 @@ namespace TikTakToe.PlayerTypes
 
             for (int i = 0; i < currentTree.Children.Count; i++)
             {
-                int temp = GetPlayerValue[currentTree.Children[i]][currentTree.State.NextPlayer];
+                int temp = GetPlayerValue[currentTree.Children[i].State.Print()][currentTree.State.NextPlayer];
                 if (temp > largestValue)
                 {
                     largestValue = temp;

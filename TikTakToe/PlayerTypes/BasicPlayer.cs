@@ -15,7 +15,7 @@ namespace TikTakToe.PlayerTypes
             : base(playerID)
         {
             this.random = random;
-            GetPlayerValue = new Dictionary<Node<Board>, Dictionary<Players, int>>();
+            GetPlayerValue = new Dictionary<int, Dictionary<Players, int>>();
         }
 
         public override (int y, int x) SelectTile(Node<Board> CurrentTree)

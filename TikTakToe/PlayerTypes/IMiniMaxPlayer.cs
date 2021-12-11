@@ -6,7 +6,7 @@ namespace TikTakToe.PlayerTypes
 {
     interface IMiniMaxPlayer
     {
-        public Dictionary<Node<Board>, Dictionary<Players, int>> GetPlayerValue { get; set; }
+        public Dictionary<int, Dictionary<Players, int>> GetPlayerValue { get; set; }
         void SetValues(Node<Board> currentTree);
     }
 }

@@ -21,26 +21,27 @@ namespace TikTakToe.PlayerTypes
         public void SetValues(Node<Board> currentTree)
         {
             Board State = currentTree.State;
-            GetPlayerValue.Add(currentTree, new Dictionary<Players, int>());
+            int currentTreeValue = currentTree.State.Print();
+            GetPlayerValue.Add(currentTree.State.Print(), new Dictionary<Players, int>());
             if (State.IsTerminal)
             {
                 Players winner = State.GetWinner();
                 if (winner == maximizer)
                 {
-                    GetPlayerValue[currentTree].Add(maximizer, 1);
-                    GetPlayerValue[currentTree].Add(minimizer, 1);
+                    GetPlayerValue[currentTreeValue].Add(maximizer, 1);
+                    GetPlayerValue[currentTreeValue].Add(minimizer, 1);
                     return;
                 }
                 else if (winner == minimizer)
                 {
-                    GetPlayerValue[currentTree].Add(maximizer, -1);
-                    GetPlayerValue[currentTree].Add(minimizer, -1);
+                    GetPlayerValue[currentTreeValue].Add(maximizer, -1);
+                    GetPlayerValue[currentTreeValue].Add(minimizer, -1);
                     return;
                 }
                 else
                 {
-                    GetPlayerValue[currentTree].Add(maximizer, 0);
-                    GetPlayerValue[currentTree].Add(minimizer, 0);
+                    GetPlayerValue[currentTreeValue].Add(maximizer, 0);
+                    GetPlayerValue[currentTreeValue].Add(minimizer, 0);
                     return;
                 }
             }
@@ -49,7 +50,7 @@ namespace TikTakToe.PlayerTypes
             for (int i = 0; i < currentTree.Children.Count; i++)
             {
                 SetValues(currentTree.Children[i]);
-                int temp = GetPlayerValue[currentTree.Children[i]][currentTree.State.NextPlayer];
+                int temp = GetPlayerValue[currentTree.Children[i].State.Print()][currentTree.State.NextPlayer];
                 if (temp < smallestValue)
                 {
                     smallestValue = temp;
@@ -61,14 +62,14 @@ namespace TikTakToe.PlayerTypes
             }
             if (State.NextPlayer == maximizer)
             {
-                GetPlayerValue[currentTree].Add(maximizer, largestValue);
-                GetPlayerValue[currentTree].Add(minimizer, largestValue);
+                GetPlayerValue[currentTreeValue].Add(maximizer, largestValue);
+                GetPlayerValue[currentTreeValue].Add(minimizer, largestValue);
                 return;
             }
             else
             {
-                GetPlayerValue[currentTree].Add(maximizer, smallestValue);
-                GetPlayerValue[currentTree].Add(minimizer, smallestValue);
+                GetPlayerValue[currentTreeValue].Add(maximizer, smallestValue);
+                GetPlayerValue[currentTreeValue].Add(minimizer, smallestValue);
                 return;
             }
         }
@@ -99,7 +100,7 @@ namespace TikTakToe.PlayerTypes
 
             for (int i = 0; i < currentTree.Children.Count; i ++)
             {
-                int temp = GetPlayerValue[currentTree.Children[i]][currentTree.Children[i].State.NextPlayer];
+                int temp = GetPlayerValue[currentTree.Children[i].State.Print()][currentTree.Children[i].State.NextPlayer];
                 if (temp < smallestValue)
                 {
                     smallestValue = temp;
@@ -112,7 +113,7 @@ namespace TikTakToe.PlayerTypes
                 }
             }
 
-            if(largestValue == GetPlayerValue[currentTree][currentTree.State.NextPlayer])
+            if(largestValue == GetPlayerValue[currentTree.State.Print()][currentTree.State.NextPlayer])
             {
                 return maximizerMove;
             }

@@ -16,7 +16,7 @@ namespace TikTakToe.PlayerTypes
             PlayerID = playerID;
         }
 
-        public Dictionary<Node<Board>, Dictionary<Players, int>> GetPlayerValue { get; set; }
+        public Dictionary<int, Dictionary<Players, int>> GetPlayerValue { get; set; }
         public abstract (int y, int x) SelectTile(Node<Board> CurrentTree);
     }
 }

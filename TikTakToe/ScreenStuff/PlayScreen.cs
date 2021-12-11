@@ -27,7 +27,7 @@ namespace TikTakToe.ScreenStuff
 
         public Dictionary<Players, Func<IGameState<Board>, Players>> GetNextPlayer = new Dictionary<Players, Func<IGameState<Board>, Players>>()
         {
-            [Players.None] = state => Players.Player2,
+            [Players.None] = state => Players.Player1,
             [Players.Player1] = state => Players.Player2,
             [Players.Player2] = state => Players.Player1,
         };
@@ -46,8 +46,8 @@ namespace TikTakToe.ScreenStuff
 
             GetPlayer = new Dictionary<Players, Player>();
             //GetPlayer.Add(Players.Player1, new MiniMaxPlayer(Players.Player1, Players.Player2, Random));
-            GetPlayer.Add(Players.Player2, new MaxiMaxPlayer(Players.Player2, activePlayers, Random));
-            GetPlayer.Add(Players.Player1, new BasicPlayer(Players.Player1, Random));
+            GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player2, activePlayers, Random));
+            GetPlayer.Add(Players.Player2, new BasicPlayer(Players.Player1, Random));
 
             GameTree = new Node<Board>();
 
@@ -61,12 +61,12 @@ namespace TikTakToe.ScreenStuff
             //int fourthMoveX = Random.Next(3, 4);
 
             GameTree.State = new Board(4, 4, 4, GetNextPlayer);
-            GameTree.State[0][0] = Players.Player2;
-            GameTree.State[0][1] = Players.Player2;
-            GameTree.State[0][2] = Players.Player1;
-            GameTree.State[0][3] = Players.Player1;
-            GameTree.State[1][0] = Players.Player2;
-            GameTree.State[2][0] = Players.Player1;
+            //GameTree.State[0][0] = Players.Player2;
+            //GameTree.State[0][1] = Players.Player2;
+            //GameTree.State[0][2] = Players.Player1;
+            //GameTree.State[0][3] = Players.Player1;
+            //GameTree.State[1][0] = Players.Player2;
+            //GameTree.State[2][0] = Players.Player1;
             //          GameTree.State[1][2] = Players.Player1;
             //GameTree.State[firstMoveY][firstMoveX] = Players.Player2;
             //GameTree.State[secondMoveY][secondMoveX] = Players.Player1;
@@ -78,7 +78,7 @@ namespace TikTakToe.ScreenStuff
             {
                 if (GetPlayer[player] is IMiniMaxPlayer currentPlayer)
                 {
-                    currentPlayer.GetPlayerValue = new Dictionary<Node<Board>, Dictionary<Players, int>>();
+                    currentPlayer.GetPlayerValue = new Dictionary<int, Dictionary<Players, int>>();
                     currentPlayer.SetValues(GameTree);
                 }
             }

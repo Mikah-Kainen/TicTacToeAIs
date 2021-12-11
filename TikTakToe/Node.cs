@@ -21,18 +21,27 @@ namespace TikTakToe
                 throw new Exception("Null startingState");
             }
 
-            BuildTree();
+            BuildTree(new Dictionary<int, Node<T>>());
             //SetValues(Players.Player1, Players.Player2);
         }
 
-        private void BuildTree()
+        private void BuildTree(Dictionary<int, Node<T>> backingDictionary)
         {
             Children = State.GetChildren();
             if (!State.IsTerminal)
             {
                 for (int i = 0; i < Children.Count; i++)
                 {
-                    Children[i].BuildTree();
+                    int currentValue = Children[i].State.Print();
+                    if (!backingDictionary.ContainsKey(currentValue))
+                    {
+                        Children[i].BuildTree(backingDictionary);
+                        backingDictionary.Add(currentValue, Children[i]);
+                    }
+                    else
+                    {
+                        Children[i] = backingDictionary[currentValue];
+                    }
                 }
             }
         }
