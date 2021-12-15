@@ -23,13 +23,15 @@ namespace TikTakToe.ScreenStuff
             [Players.None] = Color.White,
             [Players.Player1] = Color.Red,
             [Players.Player2] = Color.Blue,
+            [Players.Player3] = Color.Yellow,
         };
 
         public Dictionary<Players, Func<IGameState<Board>, Players>> GetNextPlayer = new Dictionary<Players, Func<IGameState<Board>, Players>>()
         {
             [Players.None] = state => Players.Player1,
             [Players.Player1] = state => Players.Player2,
-            [Players.Player2] = state => Players.Player1,
+            [Players.Player2] = state => Players.Player3,
+            [Players.Player3] = state => Players.Player1,
         };
 
         public Dictionary<Players, Player> GetPlayer { get; set; }
@@ -41,37 +43,23 @@ namespace TikTakToe.ScreenStuff
             Random = new Random();
 
             List<Players> activePlayers = new List<Players>();
-            activePlayers.Add(Players.Player1);
+            activePlayers.Add(Players.Player1);                
             activePlayers.Add(Players.Player2);
+            activePlayers.Add(Players.Player3);
 
             GetPlayer = new Dictionary<Players, Player>();
             //GetPlayer.Add(Players.Player1, new MiniMaxPlayer(Players.Player1, Players.Player2, Random));
-            GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player2, activePlayers, Random));
-            GetPlayer.Add(Players.Player2, new BasicPlayer(Players.Player1, Random));
+            GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player1, activePlayers, Random));
+            GetPlayer.Add(Players.Player2, new MaxiMaxPlayer(Players.Player2, activePlayers, Random));
+            GetPlayer.Add(Players.Player3, new MaxiMaxPlayer(Players.Player3, activePlayers, Random));
 
             GameTree = new Node<Board>();
 
-            //int firstMoveY = Random.Next(0, 4);
-            //int firstMoveX = Random.Next(0, 1);
-            //int secondMoveY = Random.Next(0, 4);
-            //int secondMoveX = Random.Next(1, 2);
-            //int thirdMoveY = Random.Next(0, 4);
-            //int thirdMoveX = Random.Next(2, 3);
-            //int fourthMoveY = Random.Next(0, 4);
-            //int fourthMoveX = Random.Next(3, 4);
-
-            GameTree.State = new Board(4, 4, 4, GetNextPlayer);
-            //GameTree.State[0][0] = Players.Player2;
-            //GameTree.State[0][1] = Players.Player2;
-            //GameTree.State[0][2] = Players.Player1;
-            //GameTree.State[0][3] = Players.Player1;
-            //GameTree.State[1][0] = Players.Player2;
-            //GameTree.State[2][0] = Players.Player1;
-            //          GameTree.State[1][2] = Players.Player1;
-            //GameTree.State[firstMoveY][firstMoveX] = Players.Player2;
-            //GameTree.State[secondMoveY][secondMoveX] = Players.Player1;
-            //GameTree.State[thirdMoveY][thirdMoveX] = Players.Player2;
-            //GameTree.State[fourthMoveY][fourthMoveX] = Players.Player1;
+            GameTree.State = new Board(4, 4, 3, GetNextPlayer);
+            GameTree.State[0][0] = Players.Player3;
+            GameTree.State[3][0] = Players.Player2;
+            GameTree.State[0][3] = Players.Player1;
+            GameTree.State[3][3] = Players.Player3;
 
             GameTree.CreateTree(GameTree.State);
             foreach (Players player in activePlayers)

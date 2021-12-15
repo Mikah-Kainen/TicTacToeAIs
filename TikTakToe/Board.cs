@@ -91,7 +91,7 @@ namespace TikTakToe
         {
             get
             {
-                return CurrentGame[index];
+                 return CurrentGame[index];
             }
             set
             {

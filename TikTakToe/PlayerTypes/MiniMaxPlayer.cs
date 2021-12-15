@@ -78,25 +78,8 @@ namespace TikTakToe.PlayerTypes
         {
             int smallestValue = int.MaxValue;
             int largestValue = int.MinValue;
-            (int, int) minimizerMove = (0, 0);
-            (int, int) maximizerMove = (0, 0);
-            int start = random.Next(0, 9);
-            for (int i = 0; i < 9; i++)
-            {
-                if (start == 9)
-                {
-                    start = 0;
-                }
-                int y = start / 3;
-                int x = start % 3;
-                if (currentTree.State[y][x] == Players.None)
-                {
-                    minimizerMove = (y, x);
-                    maximizerMove = (y, x);
-                    break;
-                }
-                start++;
-            }
+            (int, int) minimizerMove = currentTree.RandomMove(random);
+            (int, int) maximizerMove = currentTree.RandomMove(random);
 
             for (int i = 0; i < currentTree.Children.Count; i ++)
             {

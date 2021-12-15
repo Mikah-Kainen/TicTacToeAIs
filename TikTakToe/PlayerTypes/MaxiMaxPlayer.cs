@@ -72,25 +72,8 @@ namespace TikTakToe.PlayerTypes
 
         public override (int y, int x) SelectTile(Node<Board> currentTree)
         {
+            (int, int) maximizerMove = currentTree.RandomMove(random);
             int largestValue = int.MinValue;
-            int max = currentTree.State.Length * currentTree.State[0].Length;
-            (int, int) maximizerMove = (0, 0);
-            int start = random.Next(0, max);
-            for (int i = 0; i < max; i++)
-            {
-                if (start == max)
-                {
-                    start = 0;
-                }
-                int y = start / currentTree.State.Length;
-                int x = start % currentTree.State[0].Length;
-                if (currentTree.State[y][x] == Players.None)
-                {
-                    maximizerMove = (y, x);
-                    break;
-                }
-                start++;
-            }
 
             for (int i = 0; i < currentTree.Children.Count; i++)
             {

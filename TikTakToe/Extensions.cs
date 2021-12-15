@@ -56,6 +56,32 @@ namespace TikTakToe
             }
             return returnValue;
         }
+
+        public static (int, int) RandomMove(this Node<Board> currentGame, Random random)
+        {
+            Board currentBoard = currentGame.State;
+            int y = currentBoard.Length;
+            int x = currentBoard[0].Length;
+
+            int returnY = random.Next(0, y);
+            int returnX = random.Next(0, x);
+
+            while(currentBoard[returnY][returnX] != Players.None)
+            {
+                returnX++;
+                if(returnX >= x)
+                {
+                    returnX = 0;
+                    returnY++;
+                    if(returnY >= y)
+                    {
+                        returnY = 0;
+                    }
+                }
+            }
+
+            return (returnY, returnX);
+        }
     }
 
 }

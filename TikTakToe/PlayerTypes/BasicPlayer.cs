@@ -305,22 +305,7 @@ namespace TikTakToe.PlayerTypes
                 }
             }
 
-            int max = currentGame.Length * currentGame[0].Length;
-            int start = random.Next(0, max);
-            for(int i = 0; i < max; i ++)
-            {
-                if(start == max)
-                {
-                    start = 0;
-                }
-                int y = start / currentGame.Length;
-                int x = start % currentGame[0].Length;
-                if(currentGame[y][x] == Players.None)
-                {
-                    return (y, x);
-                }
-                start++;
-            }
+            return CurrentTree.RandomMove(random);
             
             throw new Exception("No Available Moves");
         }
