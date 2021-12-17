@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+using NeuralNetwork;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,8 +32,8 @@ namespace TikTakToe.ScreenStuff
         {
             [Players.None] = state => Players.Player1,
             [Players.Player1] = state => Players.Player2,
-            [Players.Player2] = state => Players.Player3,
-            [Players.Player3] = state => Players.Player1,
+            [Players.Player2] = state => Players.Player1,
+            //[Players.Player3] = state => Players.Player1,
         };
 
         public Dictionary<Players, Player> GetPlayer { get; set; }
@@ -45,16 +47,17 @@ namespace TikTakToe.ScreenStuff
             List<Players> activePlayers = new List<Players>();
             activePlayers.Add(Players.Player1);                
             activePlayers.Add(Players.Player2);
-            activePlayers.Add(Players.Player3);
+            //activePlayers.Add(Players.Player3);
+
 
             GetPlayer = new Dictionary<Players, Player>();
             //GetPlayer.Add(Players.Player1, new MiniMaxPlayer(Players.Player1, Players.Player2, Random));
             GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player1, activePlayers, Random));
-            GetPlayer.Add(Players.Player2, new MaxiMaxPlayer(Players.Player2, activePlayers, Random));
-            GetPlayer.Add(Players.Player3, new MaxiMaxPlayer(Players.Player3, activePlayers, Random));
+            GetPlayer.Add(Players.Player2, new NeuralNetPlayer(Players.Player2, null, Random));
+            //GetPlayer.Add(Players.Player3, new MaxiMaxPlayer(Players.Player3, activePlayers, Random));
+
 
             GameTree = new Node<Board>();
-
             GameTree.State = new Board(4, 4, 3, GetNextPlayer);
             GameTree.State[0][0] = Players.Player3;
             GameTree.State[3][0] = Players.Player2;
