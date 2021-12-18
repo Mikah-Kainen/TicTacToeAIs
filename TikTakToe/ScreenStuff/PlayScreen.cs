@@ -58,11 +58,11 @@ namespace TikTakToe.ScreenStuff
 
 
             GameTree = new Node<Board>();
-            GameTree.State = new Board(4, 4, 3, GetNextPlayer);
-            GameTree.State[0][0] = Players.Player3;
-            GameTree.State[3][0] = Players.Player2;
-            GameTree.State[0][3] = Players.Player1;
-            GameTree.State[3][3] = Players.Player3;
+            GameTree.State = new Board(3, 3, 3, GetNextPlayer);
+            //GameTree.State[0][0] = Players.Player3;
+            //GameTree.State[3][0] = Players.Player2;
+            //GameTree.State[0][3] = Players.Player1;
+            //GameTree.State[3][3] = Players.Player3;
 
             GameTree.CreateTree(GameTree.State);
             foreach (Players player in activePlayers)
@@ -73,6 +73,9 @@ namespace TikTakToe.ScreenStuff
                     currentPlayer.SetValues(GameTree);
                 }
             }
+
+            NeuralNetTrainer trainer = new NeuralNetTrainer();
+            GetPlayer[Players.Player2] = new NeuralNetPlayer(Players.Player2, trainer.GetNet(GameTree, 1000, 5000, Random), Random);
         }
 
         public void Update(GameTime gameTime)

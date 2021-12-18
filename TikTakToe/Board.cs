@@ -178,7 +178,8 @@ namespace TikTakToe
                     }
                 }
             }
-            return (0, 0);
+            throw new Exception("does this ever happen");
+            //return (0, 0);
         }
 
 
