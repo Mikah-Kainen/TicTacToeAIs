@@ -49,7 +49,7 @@ namespace TikTakToe
             NeuralNet best = null;
             for(int i = 0; i < numberOfGenerations; i ++)
             {
-                best = Train(pairs, random, 10, 10, 2, -25, 25);
+                best = Train(pairs, random, 10, 10, 2, -10, 10);
             }
             return best;
         }
@@ -95,6 +95,7 @@ namespace TikTakToe
         private bool MakeMove(Pair currentPair)
         {
             bool returnValue = false;
+            currentPair.Success = 0;
             if (currentPair.IsAlive)
             {
                 currentPair.Success++;
@@ -133,7 +134,7 @@ namespace TikTakToe
                     {
                         if (target != -1)
                         {
-                            currentPair.IsAlive = false;
+//                            currentPair.IsAlive = false;
                             goto deathZone;
                         }
                         target = a;
@@ -148,7 +149,7 @@ namespace TikTakToe
                 int xVal = target % xLength;
                 if (currentPair.Board[yVal][xVal] != Players.None)
                 {
-                    currentPair.IsAlive = false;
+//                    currentPair.IsAlive = false;
                     goto deathZone;
                 }
                 List<Node<Board>> children = currentPair.Board.GetChildren();
@@ -161,16 +162,18 @@ namespace TikTakToe
                 }
                 if (currentPair.Board.IsTerminal == true)
                 {
-                    currentPair.Success = 100;
+                    currentPair.Success = 10000;
                     currentPair.IsAlive = false;
                 }
                 else
                 {
                     returnValue = true;
                 }
+                tempCount++;
                 deathZone:;
             }
             return returnValue;
         }
+        int tempCount = 0;
     }
 }

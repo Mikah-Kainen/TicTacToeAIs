@@ -75,7 +75,7 @@ namespace TikTakToe.ScreenStuff
             }
 
             NeuralNetTrainer trainer = new NeuralNetTrainer();
-            GetPlayer[Players.Player2] = new NeuralNetPlayer(Players.Player2, trainer.GetNet(GameTree, 1000, 5000, Random), Random);
+            GetPlayer[Players.Player2] = new NeuralNetPlayer(Players.Player2, trainer.GetNet(GameTree, 1000, 10000, Random), Random);
         }
 
         public void Update(GameTime gameTime)
