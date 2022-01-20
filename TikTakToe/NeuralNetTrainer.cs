@@ -49,10 +49,11 @@ namespace TikTakToe
             NeuralNet best = null;
             for(int i = 0; i < numberOfGenerations; i ++)
             {
-                best = Train(pairs, random, 10, 10, 2, -10, 10);
+                best = Train(pairs, random, 10, 10, 2, -1, 1);
             }
             return best;
         }
+        int correctCount = 0;
 
         private NeuralNet Train(List<Pair> pairs, Random random, double preservePercent, double randomizePercent, double mutationRange, double randomizeMin, double randomizeMax)
             //preservePercent => percent of population to save, randomizePercent => percent of population to randomize, mutationRange => multiply mutations by a random value between positive and negative mutationRange
@@ -65,7 +66,7 @@ namespace TikTakToe
                     IsThereBoardAlive = MakeMove(pairs[i]);
                 }
             }
-            pairs.OrderBy<Pair, int>((Pair current) => current.Success);
+            pairs = pairs.OrderBy<Pair, int>((Pair current) => current.Success).ToList();
 
             int preserveCutoff = (int)(pairs.Count * preservePercent / 100);
             int randomizeCutoff = (int)(pairs.Count * (100 - randomizePercent) / 100);
@@ -73,6 +74,10 @@ namespace TikTakToe
             {
                 pairs[i].IsAlive = true;
                 pairs[i].Success = 0;
+                if (pairs[i].Net.Layers[3].Neurons[0].Bias != 0)
+                {
+
+                }
             }
             for(int i = preserveCutoff; i < randomizeCutoff; i ++)
             {
@@ -81,12 +86,20 @@ namespace TikTakToe
                 pairs[i].Net.Mutate(random, mutationRange);
                 pairs[i].IsAlive = true;
                 pairs[i].Success = 0;
+                if(pairs[i].Net.Layers[3].Neurons[0].Bias != 0)
+                {
+
+                }
             }
             for(int i = randomizeCutoff; i < pairs.Count; i ++)
             {
                 pairs[i].Net.Randomize(random, randomizeMin, randomizeMax);
                 pairs[i].IsAlive = true;
                 pairs[i].Success = 0;
+                if (pairs[i].Net.Layers[3].Neurons[0].Bias != 0)
+                {
+
+                }
             }
 
             return pairs[0].Net;
@@ -95,10 +108,9 @@ namespace TikTakToe
         private bool MakeMove(Pair currentPair)
         {
             bool returnValue = false;
-            currentPair.Success = 0;
             if (currentPair.IsAlive)
             {
-                currentPair.Success++;
+                //currentPair.Success++;
                 int yLength = currentPair.Board.Length;
                 int xLength = currentPair.Board[0].Length;
                 double[] inputs = new double[yLength * xLength];
@@ -158,6 +170,7 @@ namespace TikTakToe
                     if (children[z].State[yVal][xVal] == currentPair.Board.NextPlayer)
                     {
                         currentPair.Board = children[z].State;
+                        currentPair.Success++;
                     }
                 }
                 if (currentPair.Board.IsTerminal == true)
@@ -169,11 +182,10 @@ namespace TikTakToe
                 {
                     returnValue = true;
                 }
-                tempCount++;
+                correctCount++;
                 deathZone:;
             }
             return returnValue;
         }
-        int tempCount = 0;
     }
 }

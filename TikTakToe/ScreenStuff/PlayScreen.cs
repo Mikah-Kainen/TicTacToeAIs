@@ -56,6 +56,16 @@ namespace TikTakToe.ScreenStuff
             GetPlayer.Add(Players.Player2, new NeuralNetPlayer(Players.Player2, null, Random));
             //GetPlayer.Add(Players.Player3, new MaxiMaxPlayer(Players.Player3, activePlayers, Random));
 
+            int a 
+            ///////////////////////////////////////////
+            ///ORder isnt changing 
+            /////////////////////////////
+            /////////LOOK At ABOVE COMMENT 
+            //////////////////////////////////////////////
+            //////////////////////////////
+            ///////////////////
+            ////////
+
 
             GameTree = new Node<Board>();
             GameTree.State = new Board(3, 3, 3, GetNextPlayer);
@@ -75,7 +85,7 @@ namespace TikTakToe.ScreenStuff
             }
 
             NeuralNetTrainer trainer = new NeuralNetTrainer();
-            GetPlayer[Players.Player2] = new NeuralNetPlayer(Players.Player2, trainer.GetNet(GameTree, 1000, 10000, Random), Random);
+            GetPlayer[Players.Player2] = new NeuralNetPlayer(Players.Player2, trainer.GetNet(GameTree, 1000, 1000, Random), Random);
         }
 
         public void Update(GameTime gameTime)
