@@ -44,18 +44,20 @@ namespace TikTakToe
             List<Pair> pairs = new List<Pair>();
             for (int i = 0; i < numberOfSimulations; i++)
             {
-                pairs.Add(new Pair(completeGame.State, new NeuralNet(ErrorFunctions.MeanSquared, ActivationFunctions.BinaryStep, neuronsPerLayer)));
+                NeuralNet pairNet = new NeuralNet(ErrorFunctions.MeanSquared, ActivationFunctions.BinaryStep, neuronsPerLayer);
+                pairNet.Randomize(random, -1, 1);
+                pairs.Add(new Pair(completeGame.State, pairNet));
             }
             NeuralNet best = null;
             for(int i = 0; i < numberOfGenerations; i ++)
             {
-                best = Train(pairs, random, 10, 10, 2, -1, 1);
+                best = Train(pairs, random, 10, 10, 0.5f, 1.5f, -1, 1);
             }
             return best;
         }
         int correctCount = 0;
 
-        private NeuralNet Train(List<Pair> pairs, Random random, double preservePercent, double randomizePercent, double mutationRange, double randomizeMin, double randomizeMax)
+        private NeuralNet Train(List<Pair> pairs, Random random, double preservePercent, double randomizePercent, double mutationMin, double mutationMax, double randomizeMin, double randomizeMax)
             //preservePercent => percent of population to save, randomizePercent => percent of population to randomize, mutationRange => multiply mutations by a random value between positive and negative mutationRange
         {
             bool IsThereBoardAlive = true;
@@ -66,14 +68,14 @@ namespace TikTakToe
                     IsThereBoardAlive = MakeMove(pairs[i]);
                 }
             }
-            pairs = pairs.OrderBy<Pair, int>((Pair current) => current.Success).ToList();
+            pairs = pairs.OrderByDescending<Pair, int>((Pair current) => current.Success).ToList();
 
             int preserveCutoff = (int)(pairs.Count * preservePercent / 100);
             int randomizeCutoff = (int)(pairs.Count * (100 - randomizePercent) / 100);
             for(int i = 0; i < preserveCutoff; i ++)
             {
                 pairs[i].IsAlive = true;
-                pairs[i].Success = 0;
+                //pairs[i].Success = 0;
                 if (pairs[i].Net.Layers[3].Neurons[0].Bias != 0)
                 {
 
@@ -83,9 +85,9 @@ namespace TikTakToe
             {
                 int parent = random.Next(0, preserveCutoff);
                 pairs[i].Net.Cross(pairs[parent].Net, random);
-                pairs[i].Net.Mutate(random, mutationRange);
+                pairs[i].Net.Mutate(random, mutationMin, mutationMax);
                 pairs[i].IsAlive = true;
-                pairs[i].Success = 0;
+                //pairs[i].Success = 0;
                 if(pairs[i].Net.Layers[3].Neurons[0].Bias != 0)
                 {
 
@@ -95,7 +97,7 @@ namespace TikTakToe
             {
                 pairs[i].Net.Randomize(random, randomizeMin, randomizeMax);
                 pairs[i].IsAlive = true;
-                pairs[i].Success = 0;
+                //pairs[i].Success = 0;
                 if (pairs[i].Net.Layers[3].Neurons[0].Bias != 0)
                 {
 
@@ -146,7 +148,7 @@ namespace TikTakToe
                     {
                         if (target != -1)
                         {
-//                            currentPair.IsAlive = false;
+                            currentPair.IsAlive = false;
                             goto deathZone;
                         }
                         target = a;
@@ -161,7 +163,7 @@ namespace TikTakToe
                 int xVal = target % xLength;
                 if (currentPair.Board[yVal][xVal] != Players.None)
                 {
-//                    currentPair.IsAlive = false;
+                    currentPair.IsAlive = false;
                     goto deathZone;
                 }
                 List<Node<Board>> children = currentPair.Board.GetChildren();
@@ -182,6 +184,7 @@ namespace TikTakToe
                 {
                     returnValue = true;
                 }
+                currentPair.Success++;
                 correctCount++;
                 deathZone:;
             }
