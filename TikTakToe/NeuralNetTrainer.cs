@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace TikTakToe
 {
@@ -23,15 +24,32 @@ namespace TikTakToe
         }
     }
 
-    public class NeuralNetTrainer
+    public static class NeuralNetTrainer
     {
 
-        public NeuralNetTrainer()
+        public static NeuralNet LoadNet(string filePath)
+            //this function loads and builds a NeuralNetwork saved in json format. The Inputs are not set in this function
         {
+            string json = System.IO.File.ReadAllText(filePath);
+            NeuralNet result = JsonConvert.DeserializeObject<NeuralNet>(json);
 
+            for (int i = result.Layers.Length - 1; i > 0; i--)
+            {
+                result.Layers[i].PreviousLayer = result.Layers[i - 1];
+                result.Layers[i].Output = new double[result.Layers[i].Neurons.Length];
+                for (int x = 0; x < result.Layers[i].Neurons.Length; x++)
+                {
+                    for (int z = 0; z < result.Layers[i].PreviousLayer.Neurons.Length; z++)
+                    {
+                        result.Layers[i].Neurons[x].Dentrites[z].Previous = result.Layers[i].PreviousLayer.Neurons[z];
+                    }
+                }
+            }
+
+            return result;
         }
 
-        public NeuralNet GetNet(Node<Board> completeGame, int numberOfSimulations, int numberOfGenerations, Random random)
+        public static NeuralNet GetNet(Node<Board> completeGame, int numberOfSimulations, int numberOfGenerations, Random random)
         {
             int[] neuronsPerLayer = new int[]
             {
@@ -55,9 +73,9 @@ namespace TikTakToe
             }
             return best;
         }
-        int correctCount = 0;
+//        int correctCount = 0;
 
-        private NeuralNet Train(List<Pair> pairs, Random random, double preservePercent, double randomizePercent, double mutationMin, double mutationMax, double randomizeMin, double randomizeMax)
+        private static NeuralNet Train(List<Pair> pairs, Random random, double preservePercent, double randomizePercent, double mutationMin, double mutationMax, double randomizeMin, double randomizeMax)
             //preservePercent => percent of population to save, randomizePercent => percent of population to randomize, mutationRange => multiply mutations by a random value between positive and negative mutationRange
         {
             bool IsThereBoardAlive = true;
@@ -107,7 +125,7 @@ namespace TikTakToe
             return pairs[0].Net;
         }
 
-        private bool MakeMove(Pair currentPair)
+        private static bool MakeMove(Pair currentPair)
         {
             bool returnValue = false;
             if (currentPair.IsAlive)
@@ -185,7 +203,7 @@ namespace TikTakToe
                     returnValue = true;
                 }
                 currentPair.Success++;
-                correctCount++;
+//                correctCount++;
                 deathZone:;
             }
             return returnValue;

@@ -25,7 +25,7 @@ namespace TikTakToe.ScreenStuff
             [Players.None] = Color.White,
             [Players.Player1] = Color.Red,
             [Players.Player2] = Color.Blue,
-            [Players.Player3] = Color.Yellow,
+            //[Players.Player3] = Color.Yellow,
         };
 
         public Dictionary<Players, Func<IGameState<Board>, Players>> GetNextPlayer = new Dictionary<Players, Func<IGameState<Board>, Players>>()
@@ -38,31 +38,25 @@ namespace TikTakToe.ScreenStuff
 
         public Dictionary<Players, Player> GetPlayer { get; set; }
 
-        public PlayScreen()
+        public PlayScreen(NeuralNet playerNet)
         {
             Objects = new List<GameObject>();
 
             Random = new Random();
 
             List<Players> activePlayers = new List<Players>();
-            activePlayers.Add(Players.Player1);                
+            activePlayers.Add(Players.Player1);
             activePlayers.Add(Players.Player2);
             //activePlayers.Add(Players.Player3);
 
-
             GetPlayer = new Dictionary<Players, Player>();
-            //GetPlayer.Add(Players.Player1, new MiniMaxPlayer(Players.Player1, Players.Player2, Random));
-            GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player1, activePlayers, Random));
-            GetPlayer.Add(Players.Player2, new NeuralNetPlayer(Players.Player2, null, Random));
+            //GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player1, activePlayers, Random));
+            GetPlayer.Add(Players.Player1, new BasicPlayer(Players.Player1, Random));
+            GetPlayer.Add(Players.Player2, new NeuralNetPlayer(Players.Player2, playerNet, Random));
             //GetPlayer.Add(Players.Player3, new MaxiMaxPlayer(Players.Player3, activePlayers, Random));
-
 
             GameTree = new Node<Board>();
             GameTree.State = new Board(3, 3, 3, GetNextPlayer);
-            //GameTree.State[0][0] = Players.Player3;
-            //GameTree.State[3][0] = Players.Player2;
-            //GameTree.State[0][3] = Players.Player1;
-            //GameTree.State[3][3] = Players.Player3;
 
             GameTree.CreateTree(GameTree.State);
             foreach (Players player in activePlayers)
@@ -74,12 +68,26 @@ namespace TikTakToe.ScreenStuff
                 }
             }
 
-            NeuralNetTrainer trainer = new NeuralNetTrainer();
-            GetPlayer[Players.Player2] = new NeuralNetPlayer(Players.Player2, trainer.GetNet(GameTree, 1000, 1000, Random), Random);
+            if(playerNet == null)
+            {
+                foreach (Players player in activePlayers)
+                {
+                    if (GetPlayer[player] is NeuralNetPlayer currentPlayer)
+                    {
+                        currentPlayer.Net = NeuralNetTrainer.GetNet(GameTree, 1000, 1000, Random);
+                    }
+                }
+            }
         }
+
 
         public void Update(GameTime gameTime)
         {
+
+            int a
+            //Lets make a UI that will let you build your own Net at the start. There should be a dropdown for which Player to train against and a save button and maybe a display for how many times the Net won
+
+
 
             Game1.InputManager.Update(gameTime);
             for (int i = 0; i < Objects.Count; i++)
@@ -97,13 +105,22 @@ namespace TikTakToe.ScreenStuff
                         break;
                     }
                 }
-                if(GameTree.State.IsWin)
+
+                NeuralNet currentNet = null;
+                foreach (KeyValuePair<Players, Color> kvp in PlayerColor)
                 {
-                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[GameTree.State.PreviousPlayer], Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                    if (kvp.Key != Players.None && GetPlayer[kvp.Key] is NeuralNetPlayer currentPlayer)
+                    {
+                        currentNet = ((NeuralNetPlayer)GetPlayer[kvp.Key]).Net;
+                    }
+                }
+                if (GameTree.State.IsWin)
+                {
+                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[GameTree.State.PreviousPlayer], currentNet, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
                 }
                 else if(!GameTree.State.IsPlayable())
                 {
-                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[Players.None], Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[Players.None], currentNet, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
                 }
             }
         }

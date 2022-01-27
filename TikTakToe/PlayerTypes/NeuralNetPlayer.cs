@@ -60,6 +60,7 @@ namespace TikTakToe.PlayerTypes
             }
             if (target == -1)
             {
+                throw new Exception("No Move Found");
             }
             int yVal = target / yLength;
             int xVal = target % xLength;
