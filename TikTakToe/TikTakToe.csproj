@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>9</LangVersion>
     <PublishReadyToRun>false</PublishReadyToRun>
     <TieredCompilation>false</TieredCompilation>
     <UseWindowsForms>true</UseWindowsForms>
@@ -23,7 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="NeuralNetwork">
-      <HintPath>..\..\NeuralNetwork\NeuralNetwork\NeuralNetwork\bin\Debug\netcoreapp3.1\NeuralNetwork.dll</HintPath>
+      <HintPath>\\GMRDC1\Folder Redirection\Mikah.Kainen\Documents\GitHub\NeuralNetwork\NeuralNetwork\NeuralNetwork\bin\Debug\netcoreapp3.1\NeuralNetwork.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
