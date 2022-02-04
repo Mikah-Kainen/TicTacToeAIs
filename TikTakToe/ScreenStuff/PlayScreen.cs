@@ -83,11 +83,12 @@ namespace TikTakToe.ScreenStuff
 
         public void Update(GameTime gameTime)
         {
-
-            int a
+            ////////////////
+            ///////////////////
             //Lets make a UI that will let you build your own Net at the start. There should be a dropdown for which Player to train against and a save button and maybe a display for how many times the Net won
-
-
+            //////////////////
+            //////////
+            ///
 
             Game1.InputManager.Update(gameTime);
             for (int i = 0; i < Objects.Count; i++)
