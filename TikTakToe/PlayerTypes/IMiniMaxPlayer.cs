@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using static NeuralNetwork.TurnBasedBoardGameTrainerStuff.Enums;
+
 namespace TikTakToe.PlayerTypes
 {
     interface IMiniMaxPlayer

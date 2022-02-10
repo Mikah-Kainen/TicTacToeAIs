@@ -5,13 +5,13 @@ using System.Text;
 namespace TikTakToe
 {
 
-    public enum Players
-    {
-        None,
-        Player1,
-        Player2,
-        Player3,
-    };
+    //public enum Players
+    //{
+    //    None,
+    //    Player1,
+    //    Player2,
+    //    Player3,
+    //};
 
     public enum PlayerColors
 

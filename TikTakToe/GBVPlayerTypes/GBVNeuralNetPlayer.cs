@@ -6,14 +6,14 @@ using System.Text;
 
 using NeuralNetwork.TurnBasedBoardGameTrainerStuff.Enums;
 
-namespace TikTakToe.PlayerTypes
+namespace TikTakToe.GBVPlayerTypes
 {
-    public class NeuralNetPlayer : Player
+    class GBVNeuralNetPlayer : GBVPlayer
     {
         private Random random;
         public NeuralNet Net { get; set; }
 
-        public NeuralNetPlayer(Players playerID, NeuralNet net, Random random)
+        public GBVNeuralNetPlayer(Players playerID, NeuralNet net, Random random)
         : base(playerID)
         {
             Net = net;

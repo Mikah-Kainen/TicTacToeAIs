@@ -12,6 +12,11 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="PlayerTypes\**" />
+    <EmbeddedResource Remove="PlayerTypes\**" />
+    <None Remove="PlayerTypes\**" />
+  </ItemGroup>
+  <ItemGroup>
     <TrimmerRootAssembly Include="Microsoft.Xna.Framework.Content.ContentTypeReader" Visible="false" />
   </ItemGroup>
   <ItemGroup>
@@ -24,7 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="NeuralNetwork">
-      <HintPath>\\GMRDC1\Folder Redirection\Mikah.Kainen\Documents\GitHub\NeuralNetwork\NeuralNetwork\NeuralNetwork\bin\Debug\netcoreapp3.1\NeuralNetwork.dll</HintPath>
+      <HintPath>..\..\NeuralNetwork\NeuralNetwork\bin\Debug\netcoreapp3.1\NeuralNetwork.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

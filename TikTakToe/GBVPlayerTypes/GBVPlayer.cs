@@ -7,12 +7,13 @@ using NeuralNetwork.TurnBasedBoardGameTrainerStuff.Enums;
 
 using TikTakToe.DrawStuff;
 
-namespace TikTakToe.PlayerTypes
+namespace TikTakToe.GBVPlayerTypes
 {
-    public abstract class Player
+
+    public abstract class GBVPlayer
     {
         public Players PlayerID { get; set; }
-        public Player(Players playerID)
+        public GBVPlayer(Players playerID)
         {
             PlayerID = playerID;
         }

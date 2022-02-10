@@ -22,10 +22,7 @@ namespace TikTakToe
         where TSquare : IGridSquare<GridBoardState>
     {
         public int WinSize { get; set; }
-        public GridBoardSquare[][] CurrentGame { get; set; }
-        public int YLength => CurrentGame.Length;
-        public Players PreviousPlayer { get; set; }
-        //public Players NextPlayer => GetNextPlayer[PreviousPlayer](this);
+        public Enums.Players PreviousPlayer { get; set; }
         public bool IsWin { get; private set; }
 
         public bool IsTie { get; private set; }
@@ -34,12 +31,32 @@ namespace TikTakToe
 
         public bool IsTerminal { get; private set; }
 
-        public Enums.Players NextPlayer => throw new NotImplementedException();
+        public Enums.Players NextPlayer => nextPlayerMap[PreviousPlayer](this);
 
-        TSquare[][] IGridBoard<GridBoardState, TSquare>.CurrentGame => throw new NotImplementedException();
+        public TSquare[][] CurrentGame { get; set; }
+        public int YLength => CurrentGame.Length;
 
-        TSquare IGridBoard<GridBoardState, TSquare>.this[int y, int x] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public GridBoardSquare this[int y, int x] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int XLength => CurrentGame[0].Length;
+
+        public TSquare this[int y, int x] { get => CurrentGame[y][x]; set => CurrentGame[y][x] = value; }
+
+        private readonly Dictionary<Enums.Players, Func<IGridBoard<GridBoardState, TSquare>, Enums.Players>> nextPlayerMap;
+
+
+        public GridBoard(TSquare[][] currentGame, int winSize, Dictionary<Enums.Players, Func<IGridBoard<GridBoardState, TSquare>, Enums.Players>> getNextPLayer)
+        {
+            WinSize = winSize;
+            CurrentGame = new TSquare[currentGame.Length][];
+            for (int y = 0; y < currentGame.Length; y++)
+            {
+                CurrentGame[y] = new TSquare[currentGame[y].Length];
+                for (int x = 0; x < currentGame[y].Length; x++)
+                {
+                    CurrentGame[y][x] = currentGame[y][x];
+                }
+            }
+            nextPlayerMap = getNextPLayer;
+        }
 
         List<IGridBoard<GridBoardState, TSquare>> IGridBoard<GridBoardState, TSquare>.GetChildren()
         {
@@ -50,100 +67,22 @@ namespace TikTakToe
             {
                 for (int x = 0; x < CurrentGame[y].Length; x++)
                 {
-                    //if (CurrentGame[y][x] == Players.None)
-                    //{
-                    //    Board nextBoard = new Board(CurrentGame, NextPlayer, WinSize, GetNextPlayer);
-                    //    nextBoard[y][x] = NextPlayer;
-                    //    Players winner = nextBoard.GetWinner();
-                    //    nextBoard.IsWin = winner != Players.None && winner == nextBoard.PreviousPlayer;
-                    //    nextBoard.IsLose = winner != Players.None && winner != nextBoard.PreviousPlayer;
-                    //    nextBoard.IsTie = !nextBoard.IsPlayable() && !nextBoard.IsWin && !nextBoard.IsLose;
-                    //    nextBoard.IsTerminal = nextBoard.IsWin || nextBoard.IsTie || nextBoard.IsLose;
-
-                    //    Node<Board> currentChild = new Node<Board>();
-                    //    currentChild.State = nextBoard;
-                    //    children.Add(currentChild);
-                    //}
+                    if (CurrentGame[y][x].Owner == Enums.Players.None)
+                    {
+                        GridBoard<TSquare> nextBoard = new GridBoard<TSquare>(CurrentGame, WinSize, nextPlayerMap);
+                        nextBoard[y, x].Owner = NextPlayer;
+                        Enums.Players winner = nextBoard.GetWinner();
+                        nextBoard.IsWin = winner == ((IGridBoard<GridBoardState, TSquare>)this).NextPlayer;
+                        nextBoard.IsLose = winner != Enums.Players.None && winner != NextPlayer;
+                        nextBoard.IsTie = !nextBoard.IsPlayable() && !nextBoard.IsWin && !nextBoard.IsLose;
+                        nextBoard.IsTerminal = nextBoard.IsWin || nextBoard.IsTie || nextBoard.IsLose;
+                        children.Add(nextBoard);
+                    }
                 }
             }
             return children;
         }
 
-        public List<GridBoard<TSquare>> GetChildren()
-        {
-            List<GridBoard<TSquare>> children = new List<GridBoard<TSquare>>();
-            if (IsTerminal) return children;
-
-            for (int y = 0; y < CurrentGame.Length; y++)
-            {
-                for (int x = 0; x < CurrentGame[y].Length; x++)
-                {
-                    //if (CurrentGame[y][x] == Players.None)
-                    //{
-                    //    Board nextBoard = new Board(CurrentGame, NextPlayer, WinSize, GetNextPlayer);
-                    //    nextBoard[y][x] = NextPlayer;
-                    //    Players winner = nextBoard.GetWinner();
-                    //    nextBoard.IsWin = winner != Players.None && winner == nextBoard.PreviousPlayer;
-                    //    nextBoard.IsLose = winner != Players.None && winner != nextBoard.PreviousPlayer;
-                    //    nextBoard.IsTie = !nextBoard.IsPlayable() && !nextBoard.IsWin && !nextBoard.IsLose;
-                    //    nextBoard.IsTerminal = nextBoard.IsWin || nextBoard.IsTie || nextBoard.IsLose;
-
-                    //    Node<Board> currentChild = new Node<Board>();
-                    //    currentChild.State = nextBoard;
-                    //    children.Add(currentChild);
-                    //}
-                }
-            }
-            return children;
-        }
-
-        public Dictionary<Players, Func<IGameState<Board>, Players>> GetNextPlayer;
-
-        //public Board(Players[][] currentGame, Players previousPlayer, int winSize, Dictionary<Players, Func<IGameState<Board>, Players>> getNextPLayer)
-        //{
-        //    WinSize = winSize;
-        //    CurrentGame = new Players[currentGame.Length][];
-        //    for (int y = 0; y < currentGame.Length; y++)
-        //    {
-        //        CurrentGame[y] = new Players[currentGame[y].Length];
-        //        for (int x = 0; x < currentGame[y].Length; x++)
-        //        {
-        //            CurrentGame[y][x] = currentGame[y][x];
-        //        }
-        //    }
-        //    PreviousPlayer = previousPlayer;
-        //    GetNextPlayer = getNextPLayer;
-        //}
-
-        //public Board(int xSize, int ySize, int winSize, Dictionary<Players, Func<IGameState<Board>, Players>> getNextPLayer)
-        //{
-        //    WinSize = winSize;
-        //    GetNextPlayer = getNextPLayer;
-        //    CurrentGame = new Players[ySize][];
-
-        //    for (int y = 0; y < ySize; y++)
-        //    {
-        //        CurrentGame[y] = new Players[xSize];
-        //        for (int x = 0; x < xSize; x++)
-        //        {
-        //            CurrentGame[y][x] = Players.None;
-        //        }
-        //    }
-
-        //    PreviousPlayer = Players.None;
-        //}
-
-        //public Players[] this[int index]
-        //{
-        //    get
-        //    {
-        //        return CurrentGame[index];
-        //    }
-        //    set
-        //    {
-        //        CurrentGame[index] = value;
-        //    }
-        //}
 
         public Enums.Players GetWinner()
         {
@@ -231,9 +170,9 @@ namespace TikTakToe
 
         public bool IsPlayable()
         {
-            foreach (GridBoardSquare[] squares in CurrentGame)
+            foreach (TSquare[] squares in CurrentGame)
             {
-                foreach (GridBoardSquare square in squares)
+                foreach (TSquare square in squares)
                 {
                     if (square.Owner == Enums.Players.None)
                     {

@@ -7,13 +7,12 @@ using System.Text;
 using TikTakToe.DrawStuff;
 
 using NeuralNetwork.TurnBasedBoardGameTrainerStuff.Enums;
-
-namespace TikTakToe.PlayerTypes
+namespace TikTakToe.GBVPlayerTypes
 {
-    public class BasicPlayer : Player
+    class GBVBasicPlayer : GBVPlayer
     {
         private Random random;
-        public BasicPlayer(Players playerID, Random random)
+        public GBVBasicPlayer(Players playerID, Random random)
             : base(playerID)
         {
             this.random = random;
@@ -36,15 +35,15 @@ namespace TikTakToe.PlayerTypes
                         {
                             int playerCount = 0;
                             int blankSquare = -1;
-                            for(int i = 0; i < currentGame.WinSize; i ++)
+                            for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                if(currentGame[y][x + i] == PlayerID)
+                                if (currentGame[y][x + i] == PlayerID)
                                 {
                                     playerCount++;
                                 }
-                                else if(currentGame[y][x + i] == Players.None)
+                                else if (currentGame[y][x + i] == Players.None)
                                 {
-                                    if(blankSquare != -1)
+                                    if (blankSquare != -1)
                                     {
                                         playerCount = 0;
                                         break;
@@ -57,7 +56,7 @@ namespace TikTakToe.PlayerTypes
                                     break;
                                 }
                             }
-                            if(playerCount == currentGame.WinSize - 1)
+                            if (playerCount == currentGame.WinSize - 1)
                             {
                                 return (y, x + blankSquare);
                             }
@@ -169,7 +168,7 @@ namespace TikTakToe.PlayerTypes
                         Players currentPlayer = currentGame[y][x];
                         if (canMoveRight)
                         {
-                            if(currentPlayer == Players.None)
+                            if (currentPlayer == Players.None)
                             {
                                 currentPlayer = currentGame[y][x + 1];
                             }
@@ -308,7 +307,7 @@ namespace TikTakToe.PlayerTypes
             }
 
             return CurrentTree.RandomMove(random);
-            
+
             throw new Exception("No Available Moves");
         }
     }
