@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 
 using TikTakToe.DrawStuff;
-using TikTakToe.PlayerTypes;
+using TikTakToe.GBVPlayerTypes;
 
 namespace TikTakToe.ScreenStuff
 {
@@ -30,7 +30,7 @@ namespace TikTakToe.ScreenStuff
             //[Enums.Players.Player3] = Color.Yellow,
         };
 
-        public Dictionary<Players, Func<IGridBoard<INetInputer, IGridSquare<INetInputer>>, Players>> GetNextPlayer = new Dictionary<Players, Func<IGridBoard<INetInputer, IGridSquare<INetInputer>>, Players>>()
+        public Dictionary<Players, Func<IGridBoard<GridBoardState, GridBoardSquare>, Players>> GetNextPlayer = new Dictionary<Players, Func<IGridBoard<GridBoardState, GridBoardSquare>, Players>>()
         {
             [Players.None] = state =>    Players.Player1,
             [Players.Player1] = state => Players.Player2,
@@ -38,7 +38,7 @@ namespace TikTakToe.ScreenStuff
             //[Players.Player3] = state => Players.Player1,
         };
 
-        public Dictionary<Players, Player> GetPlayer { get; set; }
+        public Dictionary<Players, GBVPlayer> GetPlayer { get; set; }
 
         public GridBoardVersionPlayScreen(NeuralNet playerNet)
         {
@@ -51,32 +51,34 @@ namespace TikTakToe.ScreenStuff
             activePlayers.Add(Players.Player2);
             //activePlayers.Add(Players.Player3);
 
-            GetPlayer = new Dictionary<Players, Player>();
+            GetPlayer = new Dictionary<Players, GBVPlayer>();
             //GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player1, activePlayers, Random));
-            GetPlayer.Add(Players.Player1, new BasicPlayer(Players.Player1, Random));
-            GetPlayer.Add(Players.Player2, new NeuralNetPlayer(Players.Player2, playerNet, Random));
+            GetPlayer.Add(Players.Player1, new GBVBasicPlayer(Players.Player1, Random));
+            GetPlayer.Add(Players.Player2, new GBVNeuralNetPlayer(Players.Player2, playerNet, Random));
             //GetPlayer.Add(Players.Player3, new MaxiMaxPlayer(Players.Player3, activePlayers, Random));
 
-            GameTree = new Node<Board>();
-            GameTree.State = new Board(3, 3, 3, GetNextPlayer);
+            GameTree = (IGridBoard<INetInputer, IGridSquare<INetInputer>>)new GridBoard<GridBoardSquare>(GridBoard<GridBoardSquare>.CreateNewGridSquares(3,3), 3, GetNextPlayer);
+            //GameTree.State = new GridBoard(3, 3, 3, GetNextPlayer).CurrentGame;
 
-            GameTree.CreateTree(GameTree.State);
-            foreach (Players player in activePlayers)
-            {
-                if (GetPlayer[player] is IMiniMaxPlayer currentPlayer)
-                {
-                    currentPlayer.GetPlayerValue = new Dictionary<int, Dictionary<Players, int>>();
-                    currentPlayer.SetValues(GameTree);
-                }
-            }
+
+            //GameTree.CreateTree(GameTree.State);
+            //foreach (Players player in activePlayers)
+            //{
+            //    if (GetPlayer[player] is IMiniMaxPlayer currentPlayer)
+            //    {
+            //        currentPlayer.GetPlayerValue = new Dictionary<int, Dictionary<Players, int>>();
+            //        currentPlayer.SetValues(GameTree);
+            //    }
+            //}
 
             if (playerNet == null)
             {
                 foreach (Players player in activePlayers)
                 {
-                    if (GetPlayer[player] is NeuralNetPlayer currentPlayer)
+                    if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                     {
-                        currentPlayer.Net = NeuralNetTrainer.GetNet(GameTree, 1000, 1000, Random);
+                        NeuralNetwork.TurnBasedBoardGameTrainerStuff.TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>.GetNet();
+                        //currentPlayer.Net = NeuralNetTrainer.GetNet(GameTree, 1000, 1000, Random);
                     }
                 }
             }

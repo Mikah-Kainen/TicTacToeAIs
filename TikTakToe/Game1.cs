@@ -38,7 +38,7 @@ namespace TikTakToe
             base.Initialize();
             WhitePixel = Color.White.CreatePixel(graphics);
             ScreenManager = new ScreenManager();
-            ScreenManager.SetScreen(new PlayScreen(null));
+            ScreenManager.SetScreen(new GridBoardVersionPlayScreen(null));
         }
 
         protected override void LoadContent()

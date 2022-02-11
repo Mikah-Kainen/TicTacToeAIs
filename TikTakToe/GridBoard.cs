@@ -1,4 +1,5 @@
 ﻿using NeuralNetwork.TurnBasedBoardGameTrainerStuff;
+using NeuralNetwork.TurnBasedBoardGameTrainerStuff.Enums;
 
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace TikTakToe
     public class GridBoardSquare : IGridSquare<GridBoardState>
     {
         public GridBoardState State { get; set; }
-        public Enums.Players Owner { get; set; }
+        public Players Owner { get; set; }
         public Action<IGridSquare<GridBoardState>> WasActivated => throw new NotImplementedException();
     }
 
@@ -22,7 +23,7 @@ namespace TikTakToe
         where TSquare : IGridSquare<GridBoardState>
     {
         public int WinSize { get; set; }
-        public Enums.Players PreviousPlayer { get; set; }
+        public Players PreviousPlayer { get; set; }
         public bool IsWin { get; private set; }
 
         public bool IsTie { get; private set; }
@@ -31,7 +32,7 @@ namespace TikTakToe
 
         public bool IsTerminal { get; private set; }
 
-        public Enums.Players NextPlayer => nextPlayerMap[PreviousPlayer](this);
+        public Players NextPlayer => nextPlayerMap[PreviousPlayer](this);
 
         public TSquare[][] CurrentGame { get; set; }
         public int YLength => CurrentGame.Length;
@@ -40,10 +41,10 @@ namespace TikTakToe
 
         public TSquare this[int y, int x] { get => CurrentGame[y][x]; set => CurrentGame[y][x] = value; }
 
-        private readonly Dictionary<Enums.Players, Func<IGridBoard<GridBoardState, TSquare>, Enums.Players>> nextPlayerMap;
+        private readonly Dictionary<Players, Func<IGridBoard<GridBoardState, TSquare>, Players>> nextPlayerMap;
 
 
-        public GridBoard(TSquare[][] currentGame, int winSize, Dictionary<Enums.Players, Func<IGridBoard<GridBoardState, TSquare>, Enums.Players>> getNextPLayer)
+        public GridBoard(TSquare[][] currentGame, int winSize, Dictionary<Players, Func<IGridBoard<GridBoardState, TSquare>, Players>> getNextPLayer)
         {
             WinSize = winSize;
             CurrentGame = new TSquare[currentGame.Length][];
@@ -67,13 +68,13 @@ namespace TikTakToe
             {
                 for (int x = 0; x < CurrentGame[y].Length; x++)
                 {
-                    if (CurrentGame[y][x].Owner == Enums.Players.None)
+                    if (CurrentGame[y][x].Owner == Players.None)
                     {
                         GridBoard<TSquare> nextBoard = new GridBoard<TSquare>(CurrentGame, WinSize, nextPlayerMap);
                         nextBoard[y, x].Owner = NextPlayer;
-                        Enums.Players winner = nextBoard.GetWinner();
+                        Players winner = nextBoard.GetWinner();
                         nextBoard.IsWin = winner == ((IGridBoard<GridBoardState, TSquare>)this).NextPlayer;
-                        nextBoard.IsLose = winner != Enums.Players.None && winner != NextPlayer;
+                        nextBoard.IsLose = winner != Players.None && winner != NextPlayer;
                         nextBoard.IsTie = !nextBoard.IsPlayable() && !nextBoard.IsWin && !nextBoard.IsLose;
                         nextBoard.IsTerminal = nextBoard.IsWin || nextBoard.IsTie || nextBoard.IsLose;
                         children.Add(nextBoard);
@@ -83,8 +84,21 @@ namespace TikTakToe
             return children;
         }
 
+        public static GridBoardSquare[][] CreateNewGridSquares(int ylength, int xlength)
+        {
+            GridBoardSquare[][] returnValue = new GridBoardSquare[ylength][];
+            for (int y = 0; y < ylength; y++)
+            {
+                returnValue[y] = new GridBoardSquare[xlength];
+                for (int x = 0; x < xlength; x++)
+                {
+                    returnValue[y][x] = new GridBoardSquare();
+                }
+            }
+            return returnValue;
+        }
 
-        public Enums.Players GetWinner()
+        public Players GetWinner()
         {
             for (int y = 0; y < CurrentGame.Length; y++)
             {
@@ -93,8 +107,8 @@ namespace TikTakToe
                     bool canMoveRight = x + WinSize - 1 < CurrentGame[y].Length;
                     bool canMoveLeft = x - WinSize + 1 >= 0;
                     bool canMoveDown = y + WinSize - 1 < CurrentGame.Length;
-                    Enums.Players currentOwner = CurrentGame[y][x].Owner;
-                    if (currentOwner != Enums.Players.None)
+                    Players currentOwner = CurrentGame[y][x].Owner;
+                    if (currentOwner != Players.None)
                     {
                         if (canMoveRight)
                         {
@@ -148,7 +162,7 @@ namespace TikTakToe
                     }
                 }
             }
-            return Enums.Players.None;
+            return Players.None;
         }
 
         public (int y, int x) FindDifference(GridBoard<TSquare> targetBoard)
@@ -174,7 +188,7 @@ namespace TikTakToe
             {
                 foreach (TSquare square in squares)
                 {
-                    if (square.Owner == Enums.Players.None)
+                    if (square.Owner == Players.None)
                     {
                         return true;
                     }
