@@ -19,17 +19,17 @@ namespace TikTakToe.GBVPlayerTypes
             GetPlayerValue = new Dictionary<int, Dictionary<Players, int>>();
         }
 
-        public override (int y, int x) SelectTile(Node<Board> CurrentTree)
+        public override (int y, int x) SelectTile(GridBoard currentTree)
         {
-            Board currentGame = CurrentTree.State;
-            for (int y = 0; y < currentGame.Length; y++)
+            GridBoard currentGame = currentTree;
+            for (int y = 0; y < currentGame.YLength; y++)
             {
-                for (int x = 0; x < currentGame[y].Length; x++)
+                for (int x = 0; x < currentGame.XLength; x++)
                 {
-                    bool canMoveRight = x + currentGame.WinSize - 1 < currentGame[y].Length;
+                    bool canMoveRight = x + currentGame.WinSize - 1 < currentGame.XLength;
                     bool canMoveLeft = x - currentGame.WinSize - 1 >= 0;
-                    bool canMoveDown = y + currentGame.WinSize - 1 < currentGame.Length;
-                    if (currentGame[y][x] == PlayerID || currentGame[y][x] == Players.None)
+                    bool canMoveDown = y + currentGame.WinSize - 1 < currentGame.YLength;
+                    if (currentGame[y, x].State.Owner == PlayerID || currentGame[y, x].State.Owner == Players.None)
                     {
                         if (canMoveRight)
                         {
@@ -37,11 +37,11 @@ namespace TikTakToe.GBVPlayerTypes
                             int blankSquare = -1;
                             for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                if (currentGame[y][x + i] == PlayerID)
+                                if (currentGame[y, x + i].State.Owner == PlayerID)
                                 {
                                     playerCount++;
                                 }
-                                else if (currentGame[y][x + i] == Players.None)
+                                else if (currentGame[y, x + i].State.Owner == Players.None)
                                 {
                                     if (blankSquare != -1)
                                     {
@@ -67,11 +67,11 @@ namespace TikTakToe.GBVPlayerTypes
                             int blankSquare = -1;
                             for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                if (currentGame[y + i][x] == PlayerID)
+                                if (currentGame[y + i, x].State.Owner == PlayerID)
                                 {
                                     playerCount++;
                                 }
-                                else if (currentGame[y + i][x] == Players.None)
+                                else if (currentGame[y + i, x].State.Owner == Players.None)
                                 {
                                     if (blankSquare != -1)
                                     {
@@ -97,11 +97,11 @@ namespace TikTakToe.GBVPlayerTypes
                             int blankSquare = -1;
                             for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                if (currentGame[y + i][x + i] == PlayerID)
+                                if (currentGame[y + i, x + i].State.Owner == PlayerID)
                                 {
                                     playerCount++;
                                 }
-                                else if (currentGame[y + i][x + i] == Players.None)
+                                else if (currentGame[y + i, x + i].State.Owner == Players.None)
                                 {
                                     if (blankSquare != -1)
                                     {
@@ -127,11 +127,11 @@ namespace TikTakToe.GBVPlayerTypes
                             int blankSquare = -1;
                             for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                if (currentGame[y + i][x - i] == PlayerID)
+                                if (currentGame[y + i, x - i].State.Owner == PlayerID)
                                 {
                                     playerCount++;
                                 }
-                                else if (currentGame[y + i][x - i] == Players.None)
+                                else if (currentGame[y + i, x - i].State.Owner == Players.None)
                                 {
                                     if (blankSquare != -1)
                                     {
@@ -156,31 +156,31 @@ namespace TikTakToe.GBVPlayerTypes
             }
 
 
-            for (int y = 0; y < currentGame.Length; y++)
+            for (int y = 0; y < currentGame.YLength; y++)
             {
-                for (int x = 0; x < currentGame[y].Length; x++)
+                for (int x = 0; x < currentGame.XLength; x++)
                 {
-                    bool canMoveRight = x + currentGame.WinSize - 1 < currentGame[y].Length;
+                    bool canMoveRight = x + currentGame.WinSize - 1 < currentGame.XLength;
                     bool canMoveLeft = x - currentGame.WinSize - 1 >= 0;
-                    bool canMoveDown = y + currentGame.WinSize - 1 < currentGame.Length;
-                    if (currentGame[y][x] != PlayerID)
+                    bool canMoveDown = y + currentGame.WinSize - 1 < currentGame.YLength;
+                    if (currentGame[y, x].State.Owner != PlayerID)
                     {
-                        Players currentPlayer = currentGame[y][x];
+                        Players currentPlayer = currentGame[y, x].State.Owner;
                         if (canMoveRight)
                         {
                             if (currentPlayer == Players.None)
                             {
-                                currentPlayer = currentGame[y][x + 1];
+                                currentPlayer = currentGame[y, x + 1].State.Owner;
                             }
                             int playerCount = 0;
                             int blankSquare = -1;
                             for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                if (currentGame[y][x + i] == currentPlayer)
+                                if (currentGame[y, x + i].State.Owner == currentPlayer)
                                 {
                                     playerCount++;
                                 }
-                                else if (currentGame[y][x + i] == Players.None)
+                                else if (currentGame[y, x + i].State.Owner == Players.None)
                                 {
                                     if (blankSquare != -1)
                                     {
@@ -204,17 +204,17 @@ namespace TikTakToe.GBVPlayerTypes
                         {
                             if (currentPlayer == Players.None)
                             {
-                                currentPlayer = currentGame[y + 1][x];
+                                currentPlayer = currentGame[y + 1, x].State.Owner;
                             }
                             int playerCount = 0;
                             int blankSquare = -1;
                             for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                if (currentGame[y + i][x] == currentPlayer)
+                                if (currentGame[y + i, x].State.Owner == currentPlayer)
                                 {
                                     playerCount++;
                                 }
-                                else if (currentGame[y + i][x] == Players.None)
+                                else if (currentGame[y + i, x].State.Owner == Players.None)
                                 {
                                     if (blankSquare != -1)
                                     {
@@ -238,17 +238,17 @@ namespace TikTakToe.GBVPlayerTypes
                         {
                             if (currentPlayer == Players.None)
                             {
-                                currentPlayer = currentGame[y + 1][x + 1];
+                                currentPlayer = currentGame[y + 1, x + 1].State.Owner;
                             }
                             int playerCount = 0;
                             int blankSquare = -1;
                             for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                if (currentGame[y + i][x + i] == currentPlayer)
+                                if (currentGame[y + i, x + i].State.Owner == currentPlayer)
                                 {
                                     playerCount++;
                                 }
-                                else if (currentGame[y + i][x + i] == Players.None)
+                                else if (currentGame[y + i, x + i].State.Owner == Players.None)
                                 {
                                     if (blankSquare != -1)
                                     {
@@ -272,17 +272,17 @@ namespace TikTakToe.GBVPlayerTypes
                         {
                             if (currentPlayer == Players.None)
                             {
-                                currentPlayer = currentGame[y + 1][x - 1];
+                                currentPlayer = currentGame[y + 1, x - 1].State.Owner;
                             }
                             int playerCount = 0;
                             int blankSquare = -1;
                             for (int i = 0; i < currentGame.WinSize; i++)
                             {
-                                if (currentGame[y + i][x - i] == currentPlayer)
+                                if (currentGame[y + i, x - i].State.Owner == currentPlayer)
                                 {
                                     playerCount++;
                                 }
-                                else if (currentGame[y + i][x - i] == Players.None)
+                                else if (currentGame[y + i, x - i].State.Owner == Players.None)
                                 {
                                     if (blankSquare != -1)
                                     {
@@ -306,7 +306,7 @@ namespace TikTakToe.GBVPlayerTypes
                 }
             }
 
-            return CurrentTree.RandomMove(random);
+            return currentGame.RandomMove(random);
 
             throw new Exception("No Available Moves");
         }

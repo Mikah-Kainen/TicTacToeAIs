@@ -19,6 +19,6 @@ namespace TikTakToe.GBVPlayerTypes
         }
 
         public Dictionary<int, Dictionary<Players, int>> GetPlayerValue { get; set; }
-        public abstract (int y, int x) SelectTile(GridBoard<GridBoardSquare> CurrentTree);
+        public abstract (int y, int x) SelectTile(GridBoard CurrentTree);
     }
 }

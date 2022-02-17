@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using NeuralNetwork.TurnBasedBoardGameTrainerStuff.Enums;
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,64 +18,62 @@ namespace TikTakToe
             return returnVal;
         }
 
-        public static int Print<T> (this T board)
-            where T : IGameState<T>
+        //public static int Print<T> (this T board)
+        //    where T : IGameState<T>
+        //{
+        //    int returnValue = 0;
+        //    Board currentBoard = board as Board;
+        //    if(currentBoard == null)
+        //    {
+        //        return returnValue;
+        //    }
+
+        //    for(int y = 0; y < currentBoard.Length; y ++)
+        //    {
+        //        for(int x = 0; x < currentBoard[y].Length; x ++)
+        //        {
+        //            switch(currentBoard[y][x])
+        //            {
+        //                case Players.None:
+        //                    returnValue *= 100;
+        //                    returnValue += 00;
+        //                    break;
+
+        //                case Players.Player1:
+        //                    returnValue *= 100;
+        //                    returnValue += 01;
+        //                    break;
+
+        //                case Players.Player2:
+        //                    returnValue *= 100;
+        //                    returnValue += 10;
+        //                    break;
+
+        //                case Players.Player3:
+        //                    returnValue *= 100;
+        //                    returnValue += 11;
+        //                    break;
+        //            }
+        //        }
+        //    }
+        //    return returnValue;
+        //}
+
+        public static (int, int) RandomMove(this GridBoard currentGame, Random random)
         {
-            int returnValue = 0;
-            Board currentBoard = board as Board;
-            if(currentBoard == null)
-            {
-                return returnValue;
-            }
+            var currentBoard = currentGame;
 
-            for(int y = 0; y < currentBoard.Length; y ++)
-            {
-                for(int x = 0; x < currentBoard[y].Length; x ++)
-                {
-                    switch(currentBoard[y][x])
-                    {
-                        case Players.None:
-                            returnValue *= 100;
-                            returnValue += 00;
-                            break;
+            int returnY = random.Next(0, currentBoard.YLength);
+            int returnX = random.Next(0, currentBoard.XLength);
 
-                        case Players.Player1:
-                            returnValue *= 100;
-                            returnValue += 01;
-                            break;
-
-                        case Players.Player2:
-                            returnValue *= 100;
-                            returnValue += 10;
-                            break;
-
-                        case Players.Player3:
-                            returnValue *= 100;
-                            returnValue += 11;
-                            break;
-                    }
-                }
-            }
-            return returnValue;
-        }
-
-        public static (int, int) RandomMove(this Node<Board> currentGame, Random random)
-        {
-            Board currentBoard = currentGame.State;
-            int y = currentBoard.Length;
-            int x = currentBoard[0].Length;
-
-            int returnY = random.Next(0, y);
-            int returnX = random.Next(0, x);
-
-            while(currentBoard[returnY][returnX] != Players.None)
+            while (currentBoard[returnY, returnX].State.Owner != Players.None)
             {
                 returnX++;
-                if(returnX >= x)
+                if (returnX >= currentBoard.XLength)
                 {
                     returnX = 0;
                     returnY++;
-                    if(returnY >= y)
+                    if (returnY >= currentBoard.YLength)
                     {
                         returnY = 0;
                     }

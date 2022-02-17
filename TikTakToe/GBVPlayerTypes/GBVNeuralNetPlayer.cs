@@ -19,16 +19,16 @@ namespace TikTakToe.GBVPlayerTypes
             Net = net;
         }
 
-        public override (int y, int x) SelectTile(Node<Board> CurrentTree)
+        public override (int y, int x) SelectTile(GridBoard currentGame)
         {
-            int yLength = CurrentTree.State.Length;
-            int xLength = CurrentTree.State[0].Length;
+            int yLength = currentGame.YLength;
+            int xLength = currentGame.XLength;
             double[] inputs = new double[yLength * xLength];
             for (int y = 0; y < yLength; y++)
             {
                 for (int x = 0; x < xLength; x++)
                 {
-                    switch (CurrentTree.State[y][x])
+                    switch (currentGame[y, x].State.Owner)
                     {
                         case Players.None:
                             inputs[y * yLength + x] = 0;
@@ -66,7 +66,7 @@ namespace TikTakToe.GBVPlayerTypes
             }
             int yVal = target / yLength;
             int xVal = target % xLength;
-            if (CurrentTree.State[yVal][xVal] != Players.None)
+            if (currentGame[yVal, xVal].State.Owner != Players.None)
             {
             }
             return (yVal, xVal);

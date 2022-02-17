@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 
 using TikTakToe.DrawStuff;
-using TikTakToe.PlayerTypes;
+//using TikTakToe.PlayerTypes;
 
 namespace TikTakToe.ScreenStuff
 {

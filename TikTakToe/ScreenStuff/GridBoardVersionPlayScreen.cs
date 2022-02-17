@@ -20,7 +20,7 @@ namespace TikTakToe.ScreenStuff
     {
         public List<GameObject> Objects { get; set; }
         public Random Random { get; set; }
-        public IGridBoard<INetInputer, IGridSquare<INetInputer>> GameTree { get; set; }
+        public GridBoard GameTree { get; set; }
 
         public Dictionary<Players, Color> PlayerColor = new Dictionary<Players, Color>()
         {
@@ -30,9 +30,9 @@ namespace TikTakToe.ScreenStuff
             //[Enums.Players.Player3] = Color.Yellow,
         };
 
-        public Dictionary<Players, Func<IGridBoard<GridBoardState, GridBoardSquare>, Players>> GetNextPlayer = new Dictionary<Players, Func<IGridBoard<GridBoardState, GridBoardSquare>, Players>>()
+        public Dictionary<Players, Func<GridBoard, Players>> GetNextPlayer = new Dictionary<Players, Func<GridBoard, Players>>()
         {
-            [Players.None] = state =>    Players.Player1,
+            [Players.None] = state => Players.Player1,
             [Players.Player1] = state => Players.Player2,
             [Players.Player2] = state => Players.Player1,
             //[Players.Player3] = state => Players.Player1,
@@ -57,11 +57,13 @@ namespace TikTakToe.ScreenStuff
             GetPlayer.Add(Players.Player2, new GBVNeuralNetPlayer(Players.Player2, playerNet, Random));
             //GetPlayer.Add(Players.Player3, new MaxiMaxPlayer(Players.Player3, activePlayers, Random));
 
-            GameTree = (IGridBoard<INetInputer, IGridSquare<INetInputer>>)new GridBoard<GridBoardSquare>(GridBoard<GridBoardSquare>.CreateNewGridSquares(3,3), 3, GetNextPlayer);
+            GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), 3, GetNextPlayer);
             //GameTree.State = new GridBoard(3, 3, 3, GetNextPlayer).CurrentGame;
 
 
-            //GameTree.CreateTree(GameTree.State);
+            GameTree.CreateTree(GameTree);
+
+
             //foreach (Players player in activePlayers)
             //{
             //    if (GetPlayer[player] is IMiniMaxPlayer currentPlayer)
@@ -77,7 +79,7 @@ namespace TikTakToe.ScreenStuff
                 {
                     if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                     {
-                        NeuralNetwork.TurnBasedBoardGameTrainerStuff.TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>.GetNet();
+                        NeuralNetwork.TurnBasedBoardGameTrainerStuff.TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>.GetNet(GameTree, 1000, 1000, Random);
                         //currentPlayer.Net = NeuralNetTrainer.GetNet(GameTree, 1000, 1000, Random);
                     }
                 }
@@ -101,43 +103,39 @@ namespace TikTakToe.ScreenStuff
             }
             if (Game1.InputManager.WasKeyPressed(Keys.Space))
             {
-                (int y, int x) selected = GetPlayer[GameTree.State.NextPlayer].SelectTile(GameTree);
-                for (int i = 0; i < GameTree.Children.Count; i++)
+                (int y, int x) selected = GetPlayer[GameTree.NextPlayer].SelectTile(GameTree);
+                var children = GameTree.GetChildren();
+                for (int i = 0; i < children.Count; i++)
                 {
-                    if (GameTree.Children[i].State[selected.y][selected.x] == GameTree.State.NextPlayer)
+                    if (children[i][selected.y, selected.x].State.Owner == GameTree.NextPlayer)
                     {
-                        GameTree = GameTree.Children[i];
-                        break;
+                        GameTree = (GridBoard)children[i];
                     }
                 }
 
                 NeuralNet currentNet = null;
                 foreach (KeyValuePair<Players, Color> kvp in PlayerColor)
                 {
-                    if (kvp.Key != Players.None && GetPlayer[kvp.Key] is NeuralNetPlayer currentPlayer)
+                    if (kvp.Key != Players.None && GetPlayer[kvp.Key] is GBVNeuralNetPlayer currentPlayer)
                     {
-                        currentNet = ((NeuralNetPlayer)GetPlayer[kvp.Key]).Net;
+                        currentNet = ((GBVNeuralNetPlayer)GetPlayer[kvp.Key]).Net;
                     }
                 }
-                if (GameTree.State.IsWin)
+                if (GameTree.IsTerminal)
                 {
-                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[GameTree.State.PreviousPlayer], currentNet, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
-                }
-                else if (!GameTree.State.IsPlayable())
-                {
-                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[Players.None], currentNet, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
+                    Game1.ScreenManager.SetScreen(new EndScreen(PlayerColor[GameTree.GetWinner()], currentNet, Game1.WhitePixel.GraphicsDevice.Viewport.Bounds));
                 }
             }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            for (int y = 0; y < GameTree.State.Length; y++)
+            for (int y = 0; y < GameTree.YLength; y++)
             {
-                for (int x = 0; x < GameTree.State[y].Length; x++)
+                for (int x = 0; x < GameTree.XLength; x++)
                 {
                     Vector2 Position = new Vector2(25 + 104 * x, 25 + 104 * y);
-                    spriteBatch.Draw(Game1.WhitePixel, Position, null, PlayerColor[GameTree.State[y][x]], 0, Vector2.Zero, new Vector2(100, 100), SpriteEffects.None, 1);
+                    spriteBatch.Draw(Game1.WhitePixel, Position, null, PlayerColor[GameTree[y, x].State.Owner], 0, Vector2.Zero, new Vector2(100, 100), SpriteEffects.None, 1);
                 }
             }
             for (int i = 0; i < Objects.Count; i++)
