@@ -45,18 +45,18 @@ namespace TikTakToe.ScreenStuff
                 if (replayButton.HitBox.Contains(Game1.InputManager.Mouse.Position))
                 {
                     Game1.ScreenManager.Clear();
-                    Game1.ScreenManager.SetScreen(new PlayScreen(null));
+                    Game1.ScreenManager.SetScreen(new GridBoardVersionPlayScreen(null));
                 }
                 else if(saveButton.HitBox.Contains(Game1.InputManager.Mouse.Position))
                 {
                     Game1.ScreenManager.Clear();
                     endNet.SaveToFile("NeuralNet.json");
-                    Game1.ScreenManager.SetScreen(new PlayScreen(endNet));
+                    Game1.ScreenManager.SetScreen(new GridBoardVersionPlayScreen(endNet));
                 }
                 else if(loadButton.HitBox.Contains(Game1.InputManager.Mouse.Position))
                 {
                     Game1.ScreenManager.Clear();
-                    Game1.ScreenManager.SetScreen(new PlayScreen(NeuralNetTrainer.LoadNet("NeuralNet.json")));
+                    Game1.ScreenManager.SetScreen(new GridBoardVersionPlayScreen(NeuralNetwork.TurnBasedBoardGameTrainerStuff.TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>.LoadNet("NeuralNet.json")));
                 }
             }
         }

@@ -57,11 +57,11 @@ namespace TikTakToe.ScreenStuff
             GetPlayer.Add(Players.Player2, new GBVNeuralNetPlayer(Players.Player2, playerNet, Random));
             //GetPlayer.Add(Players.Player3, new MaxiMaxPlayer(Players.Player3, activePlayers, Random));
 
-            GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), 3, GetNextPlayer);
+            GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
             //GameTree.State = new GridBoard(3, 3, 3, GetNextPlayer).CurrentGame;
 
 
-            GameTree.CreateTree(GameTree);
+            //GameTree.CreateTree(GameTree);
 
 
             //foreach (Players player in activePlayers)
@@ -79,11 +79,13 @@ namespace TikTakToe.ScreenStuff
                 {
                     if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                     {
-                        NeuralNetwork.TurnBasedBoardGameTrainerStuff.TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>.GetNet(GameTree, 1000, 1000, Random);
+                        currentPlayer.Net = NeuralNetwork.TurnBasedBoardGameTrainerStuff.TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>.GetNet(GameTree, MakeMove, 1000, 1000, Random);
                         //currentPlayer.Net = NeuralNetTrainer.GetNet(GameTree, 1000, 1000, Random);
                     }
                 }
             }
+
+            GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
         }
 
 
@@ -103,13 +105,16 @@ namespace TikTakToe.ScreenStuff
             }
             if (Game1.InputManager.WasKeyPressed(Keys.Space))
             {
-                (int y, int x) selected = GetPlayer[GameTree.NextPlayer].SelectTile(GameTree);
-                var children = GameTree.GetChildren();
-                for (int i = 0; i < children.Count; i++)
+                if (!GameTree.IsTerminal)
                 {
-                    if (children[i][selected.y, selected.x].State.Owner == GameTree.NextPlayer)
+                    (int y, int x) selected = GetPlayer[GameTree.NextPlayer].SelectTile(GameTree);
+                    var children = GameTree.GetChildren();
+                    for (int i = 0; i < children.Count; i++)
                     {
-                        GameTree = (GridBoard)children[i];
+                        if (children[i][selected.y, selected.x].State.Owner == GameTree.NextPlayer)
+                        {
+                            GameTree = (GridBoard)children[i];
+                        }
                     }
                 }
 
@@ -144,5 +149,87 @@ namespace TikTakToe.ScreenStuff
             }
         }
 
+
+        public static bool MakeMove(Pair<GridBoardState, GridBoardSquare> currentPair)
+        {
+            bool returnValue = false;
+            if (currentPair.IsAlive)
+            {
+                //currentPair.Success++;
+                double[] inputs = new double[currentPair.Board.YLength * currentPair.Board.XLength];
+                for (int y = 0; y < currentPair.Board.YLength; y++)
+                {
+                    for (int x = 0; x < currentPair.Board.XLength; x++)
+                    {
+                        switch (currentPair.Board[y, x].State.Owner)
+                        {
+                            case Players.None:
+                                inputs[y * currentPair.Board.YLength + x] = 0;
+                                break;
+
+                            case Players.Player1:
+                                inputs[y * currentPair.Board.YLength + x] = 1;
+                                break;
+
+                            case Players.Player2:
+                                inputs[y * currentPair.Board.YLength + x] = 2;
+                                break;
+
+                            case Players.Player3:
+                                inputs[y * currentPair.Board.YLength + x] = 3;
+                                break;
+                        }
+                    }
+                }
+                double[] computedValues = currentPair.Net.Compute(inputs);
+                int target = -1;
+                for (int a = 0; a < computedValues.Length; a++)
+                {
+                    if (computedValues[a] == 1)
+                    {
+                        if (target != -1)
+                        {
+                            currentPair.IsAlive = false;
+                            goto deathZone;
+                        }
+                        target = a;
+                    }
+                }
+                if (target == -1)
+                {
+                    currentPair.IsAlive = false;
+                    goto deathZone;
+                }
+                int yVal = target / currentPair.Board.YLength;
+                int xVal = target % currentPair.Board.XLength;
+                if (currentPair.Board[yVal, xVal].State.Owner != Players.None)
+                {
+                    currentPair.IsAlive = false;
+                    goto deathZone;
+                }
+                List<IGridBoard<GridBoardState, GridBoardSquare>> children = currentPair.Board.GetChildren();
+                for (int z = 0; z < children.Count; z++)
+                {
+                    if (children[z][yVal, xVal].State.Owner == currentPair.Board.NextPlayer)
+                    {
+                        currentPair.Board = children[z];
+                        currentPair.Success++;
+                    }
+                }
+                if (currentPair.Board.IsTerminal == true)
+                {
+                    currentPair.Success = 10000;
+                    currentPair.IsAlive = false;
+                }
+                else
+                {
+                    returnValue = true;
+                }
+                currentPair.Success++;
+            //                correctCount++;
+            deathZone:;
+            }
+            return returnValue;
+        }
     }
 }

@@ -17,6 +17,10 @@ namespace TikTakToe
     {
         public GridBoardState State { get; set; }
         public Action<IGridSquare<GridBoardState>> WasActivated => throw new NotImplementedException();
+        public GridBoardSquare()
+        {
+            State = new GridBoardState();
+        }
     }
 
     public class GridBoard : IGridBoard<GridBoardState, GridBoardSquare>
@@ -44,11 +48,18 @@ namespace TikTakToe
         private readonly Dictionary<Players, Func<GridBoard, Players>> nextPlayerMap;
 
 
-        public GridBoard(GridBoardSquare[][] currentGame, int winSize, Dictionary<Players, Func<GridBoard, Players>> nextPlayerMap)
+        public GridBoard(GridBoardSquare[][] currentGame, Players previousPlayer, int winSize, Dictionary<Players, Func<GridBoard, Players>> nextPlayerMap)
         {
+            PreviousPlayer = previousPlayer;
             WinSize = winSize;
             CurrentGame = currentGame;
             this.nextPlayerMap = nextPlayerMap;
+
+            Players winner = GetWinner();
+            IsWin = winner == NextPlayer;
+            IsLose = winner != Players.None && winner != NextPlayer;
+            IsTie = !IsPlayable() && !IsWin && !IsLose;
+            IsTerminal = IsWin || IsLose || IsTie;
         }
 
         public List<IGridBoard<GridBoardState, GridBoardSquare>> GetChildren()
@@ -62,13 +73,8 @@ namespace TikTakToe
                 {
                     if (CurrentGame[y][x].State.Owner == Players.None)
                     {
-                        GridBoard nextBoard = new GridBoard(CurrentGame, WinSize, nextPlayerMap);
+                        GridBoard nextBoard = new GridBoard(CurrentGame, NextPlayer, WinSize, nextPlayerMap);
                         nextBoard[y, x].State.Owner = NextPlayer;
-                        Players winner = nextBoard.GetWinner();
-                        nextBoard.IsWin = winner == NextPlayer;
-                        nextBoard.IsLose = winner != Players.None && winner != NextPlayer;
-                        nextBoard.IsTie = !nextBoard.IsPlayable() && !nextBoard.IsWin && !nextBoard.IsLose;
-                        nextBoard.IsTerminal = nextBoard.IsWin || nextBoard.IsTie || nextBoard.IsLose;
                         children.Add(nextBoard);
                     }
                 }
@@ -85,6 +91,7 @@ namespace TikTakToe
                 for (int x = 0; x < xlength; x++)
                 {
                     returnValue[y][x] = new GridBoardSquare();
+                    returnValue[y][x].State.Owner = Players.None;
                 }
             }
             return returnValue;
