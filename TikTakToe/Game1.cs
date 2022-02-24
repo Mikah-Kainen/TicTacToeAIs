@@ -21,6 +21,7 @@ namespace TikTakToe
         public static Texture2D WhitePixel;
         public Game1()
         {
+            //
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;

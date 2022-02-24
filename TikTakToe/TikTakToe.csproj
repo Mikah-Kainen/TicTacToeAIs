@@ -28,8 +28,6 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="NeuralNetwork">
-      <HintPath>..\..\NeuralNetwork\NeuralNetwork\bin\Debug\netcoreapp3.1\NeuralNetwork.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\NeuralNetwork\NeuralNetwork\NeuralNetwork.csproj" />
   </ItemGroup>
 </Project>

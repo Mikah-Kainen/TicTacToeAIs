@@ -73,13 +73,14 @@ namespace TikTakToe.ScreenStuff
             //    }
             //}
 
+            TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare> trainer = new TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>();
             if (playerNet == null)
             {
                 foreach (Players player in activePlayers)
                 {
                     if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                     {
-                        currentPlayer.Net = NeuralNetwork.TurnBasedBoardGameTrainerStuff.TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>.GetNet(GameTree, MakeMove, 1000, 1000, Random);
+                        currentPlayer.Net = trainer.GetNet(GameTree, MakeMove, 1000, 1000, Random);
                         //currentPlayer.Net = NeuralNetTrainer.GetNet(GameTree, 1000, 1000, Random);
                     }
                 }
@@ -87,7 +88,6 @@ namespace TikTakToe.ScreenStuff
 
             GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
         }
-
 
         public void Update(GameTime gameTime)
         {
@@ -149,8 +149,7 @@ namespace TikTakToe.ScreenStuff
             }
         }
 
-
-        public static bool MakeMove(Pair<GridBoardState, GridBoardSquare> currentPair)
+        public bool MakeMove(Pair<GridBoardState, GridBoardSquare> currentPair, ref int correctCount)
         {
             bool returnValue = false;
             if (currentPair.IsAlive)
@@ -226,7 +225,7 @@ namespace TikTakToe.ScreenStuff
                     returnValue = true;
                 }
                 currentPair.Success++;
-            //                correctCount++;
+                correctCount++;
             deathZone:;
             }
             return returnValue;
