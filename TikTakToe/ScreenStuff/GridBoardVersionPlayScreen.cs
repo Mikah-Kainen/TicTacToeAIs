@@ -149,8 +149,13 @@ namespace TikTakToe.ScreenStuff
             }
         }
 
-        public bool MakeMove(Pair<GridBoardState, GridBoardSquare> currentPair, ref int correctCount)
+
+        public (bool, int, int, int) MakeMove(BoardNetPair<GridBoardState, GridBoardSquare> currentPair, ref int correctCount)
         {
+            int moreThanOneMoveSelected = 0;
+            int noMoveSelected = 0;
+            int impossibleMoveSelected = 0;
+
             bool returnValue = false;
             if (currentPair.IsAlive)
             {
@@ -189,6 +194,7 @@ namespace TikTakToe.ScreenStuff
                         if (target != -1)
                         {
                             currentPair.IsAlive = false;
+                            moreThanOneMoveSelected++;
                             goto deathZone;
                         }
                         target = a;
@@ -197,6 +203,7 @@ namespace TikTakToe.ScreenStuff
                 if (target == -1)
                 {
                     currentPair.IsAlive = false;
+                    noMoveSelected++;
                     goto deathZone;
                 }
                 int yVal = target / currentPair.Board.YLength;
@@ -204,6 +211,7 @@ namespace TikTakToe.ScreenStuff
                 if (currentPair.Board[yVal, xVal].State.Owner != Players.None)
                 {
                     currentPair.IsAlive = false;
+                    impossibleMoveSelected++;
                     goto deathZone;
                 }
                 List<IGridBoard<GridBoardState, GridBoardSquare>> children = currentPair.Board.GetChildren();
@@ -228,7 +236,7 @@ namespace TikTakToe.ScreenStuff
                 correctCount++;
             deathZone:;
             }
-            return returnValue;
+            return (returnValue, moreThanOneMoveSelected, noMoveSelected, impossibleMoveSelected);
         }
     }
 }
