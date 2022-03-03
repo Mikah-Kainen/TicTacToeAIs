@@ -11,6 +11,13 @@ namespace TikTakToe
     {
         public double[] NetInputs { get; set; }
         public Players Owner { get; set; }
+        public GridBoardState()
+        {
+        }
+        public GridBoardState(GridBoardState copyState)
+        {
+            Owner = copyState.Owner;
+        }
     }
 
     public class GridBoardSquare : IGridSquare<GridBoardState>
@@ -20,6 +27,10 @@ namespace TikTakToe
         public GridBoardSquare()
         {
             State = new GridBoardState();
+        }
+        public GridBoardSquare(GridBoardSquare copySquare)
+        {
+            State = new GridBoardState(copySquare.State);
         }
     }
 
@@ -52,9 +63,23 @@ namespace TikTakToe
         {
             PreviousPlayer = previousPlayer;
             WinSize = winSize;
-            CurrentGame = currentGame;
+            //CurrentGame = currentGame; 
+            CurrentGame = new GridBoardSquare[currentGame.Length][];
+            for(int y = 0; y < currentGame.Length; y ++)
+            {
+                CurrentGame[y] = new GridBoardSquare[currentGame[y].Length];
+                for(int x = 0; x < currentGame.Length; x ++)
+                {
+                    CurrentGame[y][x] = new GridBoardSquare(currentGame[y][x]);
+                }
+            }
             this.nextPlayerMap = nextPlayerMap;
 
+            UpdateStatus();
+        }
+
+        public void UpdateStatus()
+        {
             Players winner = GetWinner();
             IsWin = winner == NextPlayer;
             IsLose = winner != Players.None && winner != NextPlayer;
@@ -65,7 +90,10 @@ namespace TikTakToe
         public List<IGridBoard<GridBoardState, GridBoardSquare>> GetChildren()
         {
             List<IGridBoard<GridBoardState, GridBoardSquare>> children = new List<IGridBoard<GridBoardState, GridBoardSquare>>();
-            if (IsTerminal) return children;
+            if (IsTerminal)
+            {
+                return children;
+            }
 
             for (int y = 0; y < CurrentGame.Length; y++)
             {
@@ -75,7 +103,12 @@ namespace TikTakToe
                     {
                         GridBoard nextBoard = new GridBoard(CurrentGame, NextPlayer, WinSize, nextPlayerMap);
                         nextBoard[y, x].State.Owner = NextPlayer;
-                        children.Add(nextBoard);
+                        nextBoard.UpdateStatus();
+                        children.Add(nextBoard); 
+                        if(nextBoard.PreviousPlayer == Players.None || nextBoard.PreviousPlayer == Players.Player1)
+                        {
+
+                        }
                     }
                 }
             }

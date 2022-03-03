@@ -16,6 +16,21 @@ using TikTakToe.GBVPlayerTypes;
 
 namespace TikTakToe.ScreenStuff
 {
+    public class MoveStats
+    {
+        public bool MultipleMovesSelected;
+        public bool NoMoveSelected;
+        public bool ImpossibleMoveSelected;
+        public bool CorrectMoveSelected;
+        public MoveStats(bool multipleMovesSelected, bool noMoveSelected, bool impossibleMoveSelected, bool correctMoveSelected)
+        {
+            MultipleMovesSelected = multipleMovesSelected;
+            NoMoveSelected = noMoveSelected;
+            ImpossibleMoveSelected = impossibleMoveSelected;
+            CorrectMoveSelected = correctMoveSelected;
+        }
+    }
+
     class GridBoardVersionPlayScreen : IScreen
     {
         public List<GameObject> Objects { get; set; }
@@ -73,21 +88,27 @@ namespace TikTakToe.ScreenStuff
             //    }
             //}
 
-            TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare> trainer = new TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>();
+            TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats> trainer = new TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats>();
             if (playerNet == null)
             {
                 foreach (Players player in activePlayers)
                 {
                     if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                     {
-                        currentPlayer.Net = trainer.GetNet(GameTree, MakeMove, 1000, 1000, Random);
-                        //currentPlayer.Net = NeuralNetTrainer.GetNet(GameTree, 1000, 1000, Random);
+                        currentPlayer.Net = trainer.GetNet(GameTree, MakeMove, 1000, 500, Random);
                     }
                 }
             }
-
+            InterpretData(trainer.TrainingStats);
             GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
         }
+
+        //figure out why these don't add up to 1000 * 500. It is probably because the makeMove function is being skipped. Determine whether this is bad or not
+        public static int TotalMultipleMoves;
+        public static int TotalNoMoves;
+        public static int TotalImpossibleMoves;
+        public static int TotalCorrectMoves;
+        public static int[] GenerationalCorrectMoves;
 
         public void Update(GameTime gameTime)
         {
@@ -150,13 +171,14 @@ namespace TikTakToe.ScreenStuff
         }
 
 
-        public (bool, int, int, int) MakeMove(BoardNetPair<GridBoardState, GridBoardSquare> currentPair, ref int correctCount)
+        public (bool, MoveStats) MakeMove(BoardNetPair<GridBoardState, GridBoardSquare> currentPair, Random random)
         {
-            int moreThanOneMoveSelected = 0;
-            int noMoveSelected = 0;
-            int impossibleMoveSelected = 0;
+            bool multipleMovesSelected = false;
+            bool noMoveSelected = false;
+            bool impossibleMoveSelected = false;
+            bool correctMoveSelected = false;
 
-            bool returnValue = false;
+            List<IGridBoard<GridBoardState, GridBoardSquare>> children = currentPair.Board.GetChildren();
             if (currentPair.IsAlive)
             {
                 //currentPair.Success++;
@@ -194,7 +216,7 @@ namespace TikTakToe.ScreenStuff
                         if (target != -1)
                         {
                             currentPair.IsAlive = false;
-                            moreThanOneMoveSelected++;
+                            multipleMovesSelected = true;
                             goto deathZone;
                         }
                         target = a;
@@ -203,7 +225,7 @@ namespace TikTakToe.ScreenStuff
                 if (target == -1)
                 {
                     currentPair.IsAlive = false;
-                    noMoveSelected++;
+                    noMoveSelected = true;
                     goto deathZone;
                 }
                 int yVal = target / currentPair.Board.YLength;
@@ -211,10 +233,9 @@ namespace TikTakToe.ScreenStuff
                 if (currentPair.Board[yVal, xVal].State.Owner != Players.None)
                 {
                     currentPair.IsAlive = false;
-                    impossibleMoveSelected++;
+                    impossibleMoveSelected = true;
                     goto deathZone;
                 }
-                List<IGridBoard<GridBoardState, GridBoardSquare>> children = currentPair.Board.GetChildren();
                 for (int z = 0; z < children.Count; z++)
                 {
                     if (children[z][yVal, xVal].State.Owner == currentPair.Board.NextPlayer)
@@ -227,16 +248,61 @@ namespace TikTakToe.ScreenStuff
                 {
                     currentPair.Success = 10000;
                     currentPair.IsAlive = false;
-                }
-                else
-                {
-                    returnValue = true;
+                    correctMoveSelected = true;
+                    return (false, new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected));
                 }
                 currentPair.Success++;
-                correctCount++;
+                correctMoveSelected = true;
+                return (true, new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected));
             deathZone:;
             }
-            return (returnValue, moreThanOneMoveSelected, noMoveSelected, impossibleMoveSelected);
+            currentPair.Board = children[random.Next(0, children.Count)] ;
+            return (!currentPair.Board.IsTerminal, new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected));
+        }
+
+        public void InterpretData(List<MoveStats>[][] TrainingStats)
+        {
+            int totalMultipleMoves = 0;
+            int totalNoMoves = 0;
+            int totalImpossibleMoves = 0;
+            int totalCorrectMoves = 0;
+            int[] generationalCorrectMoves = new int[TrainingStats.Length];
+            int currentIndex = TrainingStats.Length;
+
+            foreach (List<MoveStats>[] subArray in TrainingStats)
+            {
+                currentIndex--;
+                generationalCorrectMoves[currentIndex] = 0;
+                foreach (List<MoveStats> subList in subArray)
+                {
+                    foreach (MoveStats moveStats in subList)
+                    {
+                        if (moveStats.MultipleMovesSelected)
+                        {
+                            totalMultipleMoves++;
+                        }
+                        if (moveStats.NoMoveSelected)
+                        {
+                            totalNoMoves++;
+                        }
+                        if (moveStats.ImpossibleMoveSelected)
+                        {
+                            totalImpossibleMoves++;
+                        }
+                        if (moveStats.CorrectMoveSelected)
+                        {
+                            totalCorrectMoves++;
+                            generationalCorrectMoves[currentIndex]++;
+                        }
+                    }
+                }
+            }
+
+            TotalMultipleMoves = totalMultipleMoves;
+            TotalNoMoves = totalNoMoves;
+            TotalImpossibleMoves = totalImpossibleMoves;
+            TotalCorrectMoves = totalCorrectMoves;
+            GenerationalCorrectMoves = generationalCorrectMoves;
         }
     }
 }
