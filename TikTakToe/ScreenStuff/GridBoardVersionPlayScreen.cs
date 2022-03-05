@@ -72,7 +72,6 @@ namespace TikTakToe.ScreenStuff
             GetPlayer.Add(Players.Player2, new GBVNeuralNetPlayer(Players.Player2, playerNet, Random));
             //GetPlayer.Add(Players.Player3, new MaxiMaxPlayer(Players.Player3, activePlayers, Random));
 
-            GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
             //GameTree.State = new GridBoard(3, 3, 3, GetNextPlayer).CurrentGame;
 
 
@@ -88,6 +87,7 @@ namespace TikTakToe.ScreenStuff
             //    }
             //}
 
+            GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
             TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats> trainer = new TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats>();
             if (playerNet == null)
             {
@@ -96,11 +96,11 @@ namespace TikTakToe.ScreenStuff
                     if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                     {
                         currentPlayer.Net = trainer.GetNet(GameTree, MakeMove, 1000, 500, Random);
+                        GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
                     }
                 }
             }
             InterpretData(trainer.TrainingStats);
-            GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
         }
 
         //figure out why these don't add up to 1000 * 500. It is probably because the makeMove function is being skipped. Determine whether this is bad or not
@@ -171,7 +171,7 @@ namespace TikTakToe.ScreenStuff
         }
 
 
-        public (bool, MoveStats) MakeMove(BoardNetPair<GridBoardState, GridBoardSquare> currentPair, Random random)
+        public MoveStats MakeMove(BoardNetPair<GridBoardState, GridBoardSquare> currentPair, Random random)
         {
             bool multipleMovesSelected = false;
             bool noMoveSelected = false;
@@ -179,7 +179,7 @@ namespace TikTakToe.ScreenStuff
             bool correctMoveSelected = false;
 
             List<IGridBoard<GridBoardState, GridBoardSquare>> children = currentPair.Board.GetChildren();
-            if (currentPair.IsAlive)
+            if (!currentPair.Board.IsTerminal)
             {
                 //currentPair.Success++;
                 double[] inputs = new double[currentPair.Board.YLength * currentPair.Board.XLength];
@@ -215,7 +215,6 @@ namespace TikTakToe.ScreenStuff
                     {
                         if (target != -1)
                         {
-                            currentPair.IsAlive = false;
                             multipleMovesSelected = true;
                             goto deathZone;
                         }
@@ -224,7 +223,6 @@ namespace TikTakToe.ScreenStuff
                 }
                 if (target == -1)
                 {
-                    currentPair.IsAlive = false;
                     noMoveSelected = true;
                     goto deathZone;
                 }
@@ -232,7 +230,6 @@ namespace TikTakToe.ScreenStuff
                 int xVal = target % currentPair.Board.XLength;
                 if (currentPair.Board[yVal, xVal].State.Owner != Players.None)
                 {
-                    currentPair.IsAlive = false;
                     impossibleMoveSelected = true;
                     goto deathZone;
                 }
@@ -247,17 +244,20 @@ namespace TikTakToe.ScreenStuff
                 if (currentPair.Board.IsTerminal == true)
                 {
                     currentPair.Success = 10000;
-                    currentPair.IsAlive = false;
                     correctMoveSelected = true;
-                    return (false, new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected));
+                    return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected);
                 }
                 currentPair.Success++;
                 correctMoveSelected = true;
-                return (true, new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected));
+                return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected);
             deathZone:;
             }
-            currentPair.Board = children[random.Next(0, children.Count)] ;
-            return (!currentPair.Board.IsTerminal, new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected));
+            else
+            {
+
+            }
+            currentPair.Board = children[random.Next(0, children.Count)];
+            return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected);
         }
 
         public void InterpretData(List<MoveStats>[][] TrainingStats)

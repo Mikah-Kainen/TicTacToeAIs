@@ -14,10 +14,6 @@ namespace TikTakToe
         public GridBoardState()
         {
         }
-        public GridBoardState(GridBoardState copyState)
-        {
-            Owner = copyState.Owner;
-        }
     }
 
     public class GridBoardSquare : IGridSquare<GridBoardState>
@@ -28,9 +24,10 @@ namespace TikTakToe
         {
             State = new GridBoardState();
         }
-        public GridBoardSquare(GridBoardSquare copySquare)
+
+        public void SetState(GridBoardState targetState)
         {
-            State = new GridBoardState(copySquare.State);
+            State.Owner = targetState.Owner;
         }
     }
 
@@ -44,38 +41,28 @@ namespace TikTakToe
 
         public bool IsLose { get; private set; }
 
-        public bool IsTerminal { get; private set; }
+        public bool IsTerminal => IsWin || IsTie || IsLose;
 
         public Players NextPlayer => nextPlayerMap[PreviousPlayer](this);
 
-        public GridBoardSquare[][] CurrentGame { get; set; }
+        public GridBoardSquare[][] CurrentBoard { get; set; }
 
-        public int YLength => CurrentGame.Length;
+        public int YLength => CurrentBoard.Length;
 
-        public int XLength => CurrentGame[0].Length;
+        public int XLength => CurrentBoard[0].Length;
 
-        public GridBoardSquare this[int y, int x] { get => CurrentGame[y][x]; set => CurrentGame[y][x] = value; }
+        public GridBoardSquare this[int y, int x] { get => CurrentBoard[y][x]; set => CurrentBoard[y][x] = value; }
 
         private readonly Dictionary<Players, Func<GridBoard, Players>> nextPlayerMap;
 
 
-        public GridBoard(GridBoardSquare[][] currentGame, Players previousPlayer, int winSize, Dictionary<Players, Func<GridBoard, Players>> nextPlayerMap)
+        public GridBoard(GridBoardSquare[][] currentBoard, Players previousPlayer, int winSize, Dictionary<Players, Func<GridBoard, Players>> nextPlayerMap)
         {
             PreviousPlayer = previousPlayer;
             WinSize = winSize;
-            //CurrentGame = currentGame; 
-            CurrentGame = new GridBoardSquare[currentGame.Length][];
-            for(int y = 0; y < currentGame.Length; y ++)
-            {
-                CurrentGame[y] = new GridBoardSquare[currentGame[y].Length];
-                for(int x = 0; x < currentGame.Length; x ++)
-                {
-                    CurrentGame[y][x] = new GridBoardSquare(currentGame[y][x]);
-                }
-            }
             this.nextPlayerMap = nextPlayerMap;
 
-            UpdateStatus();
+            SetCurrentGame(currentBoard);
         }
 
         public void UpdateStatus()
@@ -84,7 +71,6 @@ namespace TikTakToe
             IsWin = winner == NextPlayer;
             IsLose = winner != Players.None && winner != NextPlayer;
             IsTie = !IsPlayable() && !IsWin && !IsLose;
-            IsTerminal = IsWin || IsLose || IsTie;
         }
 
         public List<IGridBoard<GridBoardState, GridBoardSquare>> GetChildren()
@@ -95,13 +81,13 @@ namespace TikTakToe
                 return children;
             }
 
-            for (int y = 0; y < CurrentGame.Length; y++)
+            for (int y = 0; y < CurrentBoard.Length; y++)
             {
-                for (int x = 0; x < CurrentGame[y].Length; x++)
+                for (int x = 0; x < CurrentBoard[y].Length; x++)
                 {
-                    if (CurrentGame[y][x].State.Owner == Players.None)
+                    if (CurrentBoard[y][x].State.Owner == Players.None)
                     {
-                        GridBoard nextBoard = new GridBoard(CurrentGame, NextPlayer, WinSize, nextPlayerMap);
+                        GridBoard nextBoard = new GridBoard(CurrentBoard, NextPlayer, WinSize, nextPlayerMap);
                         nextBoard[y, x].State.Owner = NextPlayer;
                         nextBoard.UpdateStatus();
                         children.Add(nextBoard); 
@@ -132,21 +118,21 @@ namespace TikTakToe
 
         public Players GetWinner()
         {
-            for (int y = 0; y < CurrentGame.Length; y++)
+            for (int y = 0; y < CurrentBoard.Length; y++)
             {
-                for (int x = 0; x < CurrentGame[y].Length; x++)
+                for (int x = 0; x < CurrentBoard[y].Length; x++)
                 {
-                    bool canMoveRight = x + WinSize - 1 < CurrentGame[y].Length;
+                    bool canMoveRight = x + WinSize - 1 < CurrentBoard[y].Length;
                     bool canMoveLeft = x - WinSize + 1 >= 0;
-                    bool canMoveDown = y + WinSize - 1 < CurrentGame.Length;
-                    Players currentOwner = CurrentGame[y][x].State.Owner;
+                    bool canMoveDown = y + WinSize - 1 < CurrentBoard.Length;
+                    Players currentOwner = CurrentBoard[y][x].State.Owner;
                     if (currentOwner != Players.None)
                     {
                         if (canMoveRight)
                         {
                             for (int i = 1; i < WinSize; i++)
                             {
-                                if (CurrentGame[y][x + i].State.Owner != currentOwner)
+                                if (CurrentBoard[y][x + i].State.Owner != currentOwner)
                                 {
                                     goto end1;
                                 }
@@ -158,7 +144,7 @@ namespace TikTakToe
                         {
                             for (int i = 1; i < WinSize; i++)
                             {
-                                if (CurrentGame[y + i][x].State.Owner != currentOwner)
+                                if (CurrentBoard[y + i][x].State.Owner != currentOwner)
                                 {
                                     goto end2;
                                 }
@@ -170,7 +156,7 @@ namespace TikTakToe
                         {
                             for (int i = 1; i < WinSize; i++)
                             {
-                                if (CurrentGame[y + i][x + i].State.Owner != currentOwner)
+                                if (CurrentBoard[y + i][x + i].State.Owner != currentOwner)
                                 {
                                     goto end3;
                                 }
@@ -182,7 +168,7 @@ namespace TikTakToe
                         {
                             for (int i = 1; i < WinSize; i++)
                             {
-                                if (CurrentGame[y + i][x - i].State.Owner != currentOwner)
+                                if (CurrentBoard[y + i][x - i].State.Owner != currentOwner)
                                 {
                                     goto end4;
                                 }
@@ -199,11 +185,11 @@ namespace TikTakToe
 
         public (int y, int x) FindDifference(GridBoard targetBoard)
         {
-            for (int y = 0; y < CurrentGame.Length; y++)
+            for (int y = 0; y < CurrentBoard.Length; y++)
             {
-                for (int x = 0; x < CurrentGame[y].Length; x++)
+                for (int x = 0; x < CurrentBoard[y].Length; x++)
                 {
-                    if (CurrentGame[y][x].State.Owner != targetBoard[y, x].State.Owner)
+                    if (CurrentBoard[y][x].State.Owner != targetBoard[y, x].State.Owner)
                     {
                         return (y, x);
                     }
@@ -216,7 +202,7 @@ namespace TikTakToe
 
         public bool IsPlayable()
         {
-            foreach (GridBoardSquare[] squares in CurrentGame)
+            foreach (GridBoardSquare[] squares in CurrentBoard)
             {
                 foreach (GridBoardSquare square in squares)
                 {
@@ -227,6 +213,39 @@ namespace TikTakToe
                 }
             }
             return false;
+        }
+
+        public void SetCurrentGame(GridBoardSquare[][] targetBoard)
+        {
+            if (CurrentBoard == null)
+            {
+                CurrentBoard = new GridBoardSquare[targetBoard.Length][];
+                for (int y = 0; y < targetBoard.Length; y++)
+                {
+                    CurrentBoard[y] = new GridBoardSquare[targetBoard[y].Length];
+                    for (int x = 0; x < targetBoard.Length; x++)
+                    {
+                        CurrentBoard[y][x] = new GridBoardSquare();
+                        CurrentBoard[y][x].SetState(targetBoard[y][x].State);
+                    }
+                }
+            }
+            else
+            {
+                for (int y = 0; y < targetBoard.Length; y++)
+                {
+                    for (int x = 0; x < targetBoard.Length; x++)
+                    {
+                        CurrentBoard[y][x].SetState(targetBoard[y][x].State);
+                    }
+                }
+            }
+            UpdateStatus();
+        }
+
+        public IGridBoard<GridBoardState, GridBoardSquare> Clone()
+        {
+            return new GridBoard(CurrentBoard, PreviousPlayer, WinSize, nextPlayerMap);
         }
     }
 }
