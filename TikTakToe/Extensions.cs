@@ -82,6 +82,19 @@ namespace TikTakToe
 
             return (returnY, returnX);
         }
+
+        public static GridBoard FindChild(this(int y, int x) selectedSquare, Players selectingPlayer, GridBoard currentBoard)
+        {
+            var children = currentBoard.GetChildren();
+            for(int i = 0; i < children.Count; i ++)
+            {
+                if(children[i][selectedSquare.y, selectedSquare.x].State.Owner == selectingPlayer)
+                {
+                    return (GridBoard)children[i];
+                }
+            }
+            throw new Exception("Child Not Found");
+        }
     }
 
 }

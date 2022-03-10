@@ -22,12 +22,14 @@ namespace TikTakToe.ScreenStuff
         public bool NoMoveSelected;
         public bool ImpossibleMoveSelected;
         public bool CorrectMoveSelected;
-        public MoveStats(bool multipleMovesSelected, bool noMoveSelected, bool impossibleMoveSelected, bool correctMoveSelected)
+        public bool WinningMoveSelected;
+        public MoveStats(bool multipleMovesSelected, bool noMoveSelected, bool impossibleMoveSelected, bool correctMoveSelected, bool winningMoveSelected)
         {
             MultipleMovesSelected = multipleMovesSelected;
             NoMoveSelected = noMoveSelected;
             ImpossibleMoveSelected = impossibleMoveSelected;
             CorrectMoveSelected = correctMoveSelected;
+            WinningMoveSelected = winningMoveSelected;
         }
     }
 
@@ -87,28 +89,39 @@ namespace TikTakToe.ScreenStuff
             //    }
             //}
 
+            Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, IGridBoard<GridBoardState, GridBoardSquare>>[] opponentMoves = new Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, IGridBoard<GridBoardState, GridBoardSquare>>[activePlayers.Count - 1];
+            opponentMoves[0] = (board, random) => GetPlayer[Players.Player1].SelectTile((GridBoard)board).FindChild(Players.Player1, (GridBoard)board);
+
+
+            //////lets add a minimax player just to train the neuralNet with. I think the randomization of the basic player is messing up training. If not, investigate why the generationalWinningMoves count is so unpredictable
+
+
+
+
+
             GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
             TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats> trainer = new TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats>();
-            if (playerNet == null)
+
+            foreach (Players player in activePlayers)
             {
-                foreach (Players player in activePlayers)
+                if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                 {
-                    if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
-                    {
-                        currentPlayer.Net = trainer.GetNet(GameTree, MakeMove, 1000, 500, Random);
-                        GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
-                    }
+                    currentPlayer.Net = trainer.GetNet(GameTree, activePlayers.ToArray(), MakeMove, opponentMoves, 1000, 150, Random, playerNet);
+                    GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
                 }
             }
             InterpretData(trainer.TrainingStats);
         }
 
-        //figure out why these don't add up to 1000 * 500. It is probably because the makeMove function is being skipped. Determine whether this is bad or not
+
         public static int TotalMultipleMoves;
         public static int TotalNoMoves;
         public static int TotalImpossibleMoves;
         public static int TotalCorrectMoves;
         public static int[] GenerationalCorrectMoves;
+
+        public static int TotalWinningMoves;
+        public static int[] GenerationalWinningMoves;
 
         public void Update(GameTime gameTime)
         {
@@ -177,7 +190,9 @@ namespace TikTakToe.ScreenStuff
             bool noMoveSelected = false;
             bool impossibleMoveSelected = false;
             bool correctMoveSelected = false;
+            bool winningMoveSelected = false;
 
+            Players neuralNetPlayer = currentPair.Board.NextPlayer;
             List<IGridBoard<GridBoardState, GridBoardSquare>> children = currentPair.Board.GetChildren();
             if (!currentPair.Board.IsTerminal)
             {
@@ -243,13 +258,19 @@ namespace TikTakToe.ScreenStuff
                 }
                 if (currentPair.Board.IsTerminal == true)
                 {
-                    currentPair.Success = 10000;
+                    Players winner = currentPair.Board.GetWinner();
+                    currentPair.Success = 4;
+                    if(winner == neuralNetPlayer)
+                    {
+                        currentPair.Success = 10000;
+                        winningMoveSelected = true;
+                    }
                     correctMoveSelected = true;
-                    return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected);
+                    return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected, winningMoveSelected);
                 }
                 currentPair.Success++;
                 correctMoveSelected = true;
-                return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected);
+                return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected, winningMoveSelected);
             deathZone:;
             }
             else
@@ -257,7 +278,7 @@ namespace TikTakToe.ScreenStuff
 
             }
             currentPair.Board = children[random.Next(0, children.Count)];
-            return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected);
+            return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected, winningMoveSelected);
         }
 
         public void InterpretData(List<MoveStats>[][] TrainingStats)
@@ -267,6 +288,9 @@ namespace TikTakToe.ScreenStuff
             int totalImpossibleMoves = 0;
             int totalCorrectMoves = 0;
             int[] generationalCorrectMoves = new int[TrainingStats.Length];
+            int totalWinningMoves = 0;
+            int[] generationalWinningMoves = new int[TrainingStats.Length];
+
             int currentIndex = TrainingStats.Length;
 
             foreach (List<MoveStats>[] subArray in TrainingStats)
@@ -294,6 +318,11 @@ namespace TikTakToe.ScreenStuff
                             totalCorrectMoves++;
                             generationalCorrectMoves[currentIndex]++;
                         }
+                        if(moveStats.WinningMoveSelected)
+                        {
+                            totalWinningMoves++;
+                            generationalWinningMoves[currentIndex]++;
+                        }
                     }
                 }
             }
@@ -303,6 +332,8 @@ namespace TikTakToe.ScreenStuff
             TotalImpossibleMoves = totalImpossibleMoves;
             TotalCorrectMoves = totalCorrectMoves;
             GenerationalCorrectMoves = generationalCorrectMoves;
+            TotalWinningMoves = totalWinningMoves;
+            GenerationalWinningMoves = generationalWinningMoves;
         }
     }
 }

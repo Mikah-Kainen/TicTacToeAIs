@@ -26,7 +26,7 @@ namespace TikTakToe.ScreenStuff
             Objects = new List<GameObject>();
             replayButton = new Sprite(Game1.WhitePixel, winner, pos, Vector2.One, windowSize, Vector2.Zero);
             saveButton = new Sprite(Game1.WhitePixel, Color.DarkGoldenrod, new Vector2(pos.X, pos.Y + windowSize.Y), Vector2.One, new Vector2(windowSize.X, 50), Vector2.Zero);
-            loadButton = new Sprite(Game1.WhitePixel, Color.Khaki, new Vector2(pos.X, pos.Y + windowSize.Y + 50), Vector2.One, new Vector2(windowSize.X, 50), Vector2.Zero);
+            loadButton = new Sprite(Game1.WhitePixel, Color.Purple, new Vector2(pos.X, pos.Y + windowSize.Y + 50), Vector2.One, new Vector2(windowSize.X, 50), Vector2.Zero);
             Objects.Add(replayButton);
             Objects.Add(saveButton);
             Objects.Add(loadButton);
