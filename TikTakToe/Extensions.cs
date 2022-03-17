@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using NeuralNetwork.TurnBasedBoardGameTrainerStuff;
 using NeuralNetwork.TurnBasedBoardGameTrainerStuff.Enums;
 
 using System;
@@ -58,6 +59,80 @@ namespace TikTakToe
         //    }
         //    return returnValue;
         //}
+
+        public static int Print<T>(this T[][] currentBoard)
+            where T : IGridSquare<GridBoardState>
+        {
+            if (currentBoard == null)
+            {
+                throw new Exception("null board");
+            }
+
+            byte[] returnBytes = new byte[4];
+            int currentIndex = 1;
+            int currentIncriment = 3;
+            //returnBytes[1] <<= 6;
+            for (int y = 0; y < currentBoard.Length; y++)
+            {
+                for (int x = 0; x < currentBoard[y].Length; x++)
+                {
+                    switch (currentBoard[y][x].State.Owner)
+                    {
+                        case Players.None:
+                            returnBytes[currentIndex] <<= 2;
+                            //returnBytes[currentIndex] |= 00;
+                            break;
+
+                        case Players.Player1:
+                            returnBytes[currentIndex] <<= 2;
+                            returnBytes[currentIndex] |= 1;
+                            break;
+
+                        case Players.Player2:
+                            returnBytes[currentIndex] <<= 2;
+                            returnBytes[currentIndex] |= 2;
+                            break;
+
+                        case Players.Player3:
+                            returnBytes[currentIndex] <<= 2;
+                            returnBytes[currentIndex] |= 3;
+                            break;
+                    }
+                    currentIncriment++;
+                    if(currentIncriment == 4)
+                    {
+                        currentIndex++;
+                        currentIncriment = 0;
+                    }
+                }
+            }
+            return BitConverter.ToInt32(returnBytes, 0);
+        }
+
+        public static (int y, int x) FindDifference<T>(this T[][] currentBoard, T[][] compareBoard)
+            where T : IGridSquare<GridBoardState>
+        {
+            (int y, int x) difference = (-1, -1);
+            int differenceCount = 0;
+
+            for(int y = 0; y < currentBoard.Length; y ++)
+            {
+                for(int x = 0; x < currentBoard[y].Length; x ++)
+                {
+                    if(currentBoard[y][x].State.Owner != compareBoard[y][x].State.Owner)
+                    {
+                        difference = (y, x);
+                        differenceCount++;
+                    }
+                }
+            }
+
+            if(differenceCount != 1)
+            {
+                throw new Exception("Invalid differences found");
+            }
+            return difference;
+        }
 
         public static (int, int) RandomMove(this GridBoard currentGame, Random random)
         {

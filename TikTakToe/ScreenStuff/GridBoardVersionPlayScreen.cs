@@ -70,24 +70,22 @@ namespace TikTakToe.ScreenStuff
 
             GetPlayer = new Dictionary<Players, GBVPlayer>();
             //GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player1, activePlayers, Random));
-            GetPlayer.Add(Players.Player1, new GBVBasicPlayer(Players.Player1, Random));
+            //GetPlayer.Add(Players.Player1, new GBVBasicPlayer(Players.Player1, Random));
+            GetPlayer.Add(Players.Player1, new GBVMaxiMaxPlayer(Players.Player1, activePlayers, Random));
             GetPlayer.Add(Players.Player2, new GBVNeuralNetPlayer(Players.Player2, playerNet, Random));
-            //GetPlayer.Add(Players.Player3, new MaxiMaxPlayer(Players.Player3, activePlayers, Random));
 
-            //GameTree.State = new GridBoard(3, 3, 3, GetNextPlayer).CurrentGame;
-
-
+            GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
             //GameTree.CreateTree(GameTree);
 
 
-            //foreach (Players player in activePlayers)
-            //{
-            //    if (GetPlayer[player] is IMiniMaxPlayer currentPlayer)
-            //    {
-            //        currentPlayer.GetPlayerValue = new Dictionary<int, Dictionary<Players, int>>();
-            //        currentPlayer.SetValues(GameTree);
-            //    }
-            //}
+            foreach (Players player in activePlayers)
+            {
+                if (GetPlayer[player] is GBVMaxiMaxPlayer currentPlayer)
+                {
+                    currentPlayer.GetPlayerValue = new Dictionary<int, Dictionary<Players, int>>();
+                    currentPlayer.SetValues(GameTree);
+                }
+            }
 
             Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, IGridBoard<GridBoardState, GridBoardSquare>>[] opponentMoves = new Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, IGridBoard<GridBoardState, GridBoardSquare>>[activePlayers.Count - 1];
             GBVPlayer trainingOpponent = GetPlayer[Players.Player1];
@@ -95,12 +93,12 @@ namespace TikTakToe.ScreenStuff
 
 
             //////lets add a minimax player just to train the neuralNet with. I think the randomization of the basic player is messing up training. If not, investigate why the generationalWinningMoves count is so unpredictable
+            ///I think that during training for the neural net the net is facing impossible situations. This explains why the boards aren't registered in the dictionary. Maybe next time the exception is thrown look through the values and draw the board to see if its possible
 
 
 
 
-
-            GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
+            //GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
             TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats> trainer = new TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats>();
 
             foreach (Players player in activePlayers)
@@ -109,9 +107,9 @@ namespace TikTakToe.ScreenStuff
                 {
                     currentPlayer.Net = trainer.GetNet(GameTree, activePlayers.ToArray(), MakeMove, opponentMoves, 1000, 150, Random, playerNet);
                     GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
+                    InterpretData(trainer.TrainingStats);
                 }
             }
-            InterpretData(trainer.TrainingStats);
         }
 
 

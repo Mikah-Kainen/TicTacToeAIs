@@ -17,18 +17,18 @@ namespace TikTakToe.GBVPlayerTypes
             this.activePlayers = activePlayers;
         }
 
-        public void SetValues(Node<Board> currentTree)
+        public void SetValues(GridBoard currentTree)
         {
-            Board State = currentTree.State;
-            int currentTreeValue = currentTree.State.Print();
+            var board = currentTree.CurrentBoard;
+            int currentTreeValue = board.Print();
             if (!GetPlayerValue.ContainsKey(currentTreeValue))
             {
                 GetPlayerValue.Add(currentTreeValue, new Dictionary<Players, int>());
-                if (State.IsTerminal)
+                if (currentTree.IsTerminal)
                 {
                     foreach (Players player in activePlayers)
                     {
-                        Players winner = State.GetWinner();
+                        Players winner = currentTree.GetWinner();
                         if (winner == player)
                         {
                             GetPlayerValue[currentTreeValue].Add(player, 1);
@@ -46,48 +46,30 @@ namespace TikTakToe.GBVPlayerTypes
                 else
                 {
                     int largestValue = int.MinValue;
-                    Node<Board> largestValueMove = null;
-                    for (int i = 0; i < currentTree.Children.Count; i++)
+                    GridBoard largestValueMove = null;
+                    for (int i = 0; i < currentTree.GetChildren().Count; i++)
                     {
-                        SetValues(currentTree.Children[i]);
-                        int temp = GetPlayerValue[currentTree.Children[i].State.Print()][currentTree.State.NextPlayer];
+                        SetValues((GridBoard)currentTree.GetChildren()[i]);
+                        int temp = GetPlayerValue[currentTree.GetChildren()[i].CurrentBoard.Print()][currentTree.NextPlayer];
                         if (temp > largestValue)
                         {
                             largestValue = temp;
-                            largestValueMove = currentTree.Children[i];
+                            largestValueMove = (GridBoard)currentTree.GetChildren()[i];
                         }
                     }
                     foreach (Players player in activePlayers)
                     {
-                        if (player == currentTree.State.NextPlayer)
+                        if (player == currentTree.NextPlayer)
                         {
                             GetPlayerValue[currentTreeValue].Add(player, largestValue);
                         }
                         else
                         {
-                            GetPlayerValue[currentTreeValue].Add(player, GetPlayerValue[largestValueMove.State.Print()][player]);
+                            GetPlayerValue[currentTreeValue].Add(player, GetPlayerValue[largestValueMove.CurrentBoard.Print()][player]);
                         }
                     }
                 }
             }
-        }
-
-        public override (int y, int x) SelectTile(Node<Board> currentTree)
-        {
-            (int, int) maximizerMove = currentTree.RandomMove(random);
-            int largestValue = int.MinValue;
-
-            for (int i = 0; i < currentTree.Children.Count; i++)
-            {
-                int temp = GetPlayerValue[currentTree.Children[i].State.Print()][currentTree.State.NextPlayer];
-                if (temp > largestValue)
-                {
-                    largestValue = temp;
-                    maximizerMove = currentTree.State.FindDifference(currentTree.Children[i].State);
-                }
-            }
-
-            return maximizerMove;
         }
 
         public override (int y, int x) SelectTile(GridBoard currentTree)
@@ -98,11 +80,11 @@ namespace TikTakToe.GBVPlayerTypes
             var children = currentTree.GetChildren();
             for (int i = 0; i < children.Count; i++)
             {
-                int temp = GetPlayerValue[children[i].State.Print()][currentTree.State.NextPlayer];
+                int temp = GetPlayerValue[children[i].CurrentBoard.Print()][currentTree.NextPlayer];
                 if (temp > largestValue)
                 {
                     largestValue = temp;
-                    maximizerMove = currentTree.State.FindDifference(children[i].State);
+                    maximizerMove = currentTree.CurrentBoard.FindDifference(children[i].CurrentBoard);
                 }
             }
 
