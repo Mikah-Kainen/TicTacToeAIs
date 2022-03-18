@@ -93,7 +93,6 @@ namespace TikTakToe.ScreenStuff
 
 
             //////lets add a minimax player just to train the neuralNet with. I think the randomization of the basic player is messing up training. If not, investigate why the generationalWinningMoves count is so unpredictable
-            ///I think that during training for the neural net the net is facing impossible situations. This explains why the boards aren't registered in the dictionary. Maybe next time the exception is thrown look through the values and draw the board to see if its possible
 
 
 

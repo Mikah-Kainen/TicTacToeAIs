@@ -69,8 +69,8 @@ namespace TikTakToe
             }
 
             byte[] returnBytes = new byte[4];
-            int currentIndex = 1;
-            int currentIncriment = 3;
+            int currentIndex = 0;
+            int currentIncriment = 0;
             //returnBytes[1] <<= 6;
             for (int y = 0; y < currentBoard.Length; y++)
             {

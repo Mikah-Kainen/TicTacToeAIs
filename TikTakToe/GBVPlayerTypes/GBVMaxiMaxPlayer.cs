@@ -80,6 +80,7 @@ namespace TikTakToe.GBVPlayerTypes
             var children = currentTree.GetChildren();
             for (int i = 0; i < children.Count; i++)
             {
+                //8790, 141396
                 int temp = GetPlayerValue[children[i].CurrentBoard.Print()][currentTree.NextPlayer];
                 if (temp > largestValue)
                 {
