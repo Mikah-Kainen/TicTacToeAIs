@@ -17,29 +17,29 @@ namespace TikTakToe.GBVPlayerTypes
             this.activePlayers = activePlayers;
         }
 
-        public void SetValues(GridBoard currentTree)
+        public void SetValues(GridBoard currentBoard)
         {
-            var board = currentTree.CurrentBoard;
-            int currentTreeValue = board.Print();
-            if (!GetPlayerValue.ContainsKey(currentTreeValue))
+            var board = currentBoard.CurrentBoard;
+            int currentBoardValue = board.Print();
+            if (!GetPlayerValue.ContainsKey(currentBoardValue))
             {
-                GetPlayerValue.Add(currentTreeValue, new Dictionary<Players, int>());
-                if (currentTree.IsTerminal)
+                GetPlayerValue.Add(currentBoardValue, new Dictionary<Players, int>());
+                if (currentBoard.IsTerminal)
                 {
                     foreach (Players player in activePlayers)
                     {
-                        Players winner = currentTree.GetWinner();
+                        Players winner = currentBoard.GetWinner();
                         if (winner == player)
                         {
-                            GetPlayerValue[currentTreeValue].Add(player, 1);
+                            GetPlayerValue[currentBoardValue].Add(player, 1);
                         }
                         else if (winner != player && winner != Players.None)
                         {
-                            GetPlayerValue[currentTreeValue].Add(player, -1);
+                            GetPlayerValue[currentBoardValue].Add(player, -1);
                         }
                         else
                         {
-                            GetPlayerValue[currentTreeValue].Add(player, 0);
+                            GetPlayerValue[currentBoardValue].Add(player, 0);
                         }
                     }
                 }
@@ -47,25 +47,25 @@ namespace TikTakToe.GBVPlayerTypes
                 {
                     int largestValue = int.MinValue;
                     GridBoard largestValueMove = null;
-                    for (int i = 0; i < currentTree.GetChildren().Count; i++)
+                    for (int i = 0; i < currentBoard.GetChildren().Count; i++)
                     {
-                        SetValues((GridBoard)currentTree.GetChildren()[i]);
-                        int temp = GetPlayerValue[currentTree.GetChildren()[i].CurrentBoard.Print()][currentTree.NextPlayer];
+                        SetValues((GridBoard)currentBoard.GetChildren()[i]);
+                        int temp = GetPlayerValue[currentBoard.GetChildren()[i].CurrentBoard.Print()][currentBoard.NextPlayer];
                         if (temp > largestValue)
                         {
                             largestValue = temp;
-                            largestValueMove = (GridBoard)currentTree.GetChildren()[i];
+                            largestValueMove = (GridBoard)currentBoard.GetChildren()[i];
                         }
                     }
                     foreach (Players player in activePlayers)
                     {
-                        if (player == currentTree.NextPlayer)
+                        if (player == currentBoard.NextPlayer)
                         {
-                            GetPlayerValue[currentTreeValue].Add(player, largestValue);
+                            GetPlayerValue[currentBoardValue].Add(player, largestValue);
                         }
                         else
                         {
-                            GetPlayerValue[currentTreeValue].Add(player, GetPlayerValue[largestValueMove.CurrentBoard.Print()][player]);
+                            GetPlayerValue[currentBoardValue].Add(player, GetPlayerValue[largestValueMove.CurrentBoard.Print()][player]);
                         }
                     }
                 }
@@ -80,12 +80,16 @@ namespace TikTakToe.GBVPlayerTypes
             var children = currentTree.GetChildren();
             for (int i = 0; i < children.Count; i++)
             {
-                //8790, 141396
-                int temp = GetPlayerValue[children[i].CurrentBoard.Print()][currentTree.NextPlayer];
-                if (temp > largestValue)
+                int superTemp = children[i].CurrentBoard.Print();
+                bool isLose = children[i].GetWinner() != children[i].NextPlayer && children[i].GetWinner() != Players.None;
+                if (!isLose)
                 {
-                    largestValue = temp;
-                    maximizerMove = currentTree.CurrentBoard.FindDifference(children[i].CurrentBoard);
+                    int temp = GetPlayerValue[superTemp][currentTree.NextPlayer];
+                    if (temp > largestValue)
+                    {
+                        largestValue = temp;
+                        maximizerMove = currentTree.CurrentBoard.FindDifference(children[i].CurrentBoard);
+                    }
                 }
             }
 

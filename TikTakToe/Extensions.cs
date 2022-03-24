@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using TikTakToe.GBVPlayerTypes;
+
 namespace TikTakToe
 {
     public static class Extensions
@@ -17,6 +19,15 @@ namespace TikTakToe
             Texture2D returnVal = new Texture2D(graphics.GraphicsDevice, 1, 1);
             returnVal.SetData(new Color[] { color}, 0, 1);
             return returnVal;
+        }
+
+        public static (int y, int x) SelectTile(this GBVPlayer player, GridBoard currentTree, Dictionary<int, Dictionary<Players, int>> getPlayerValue)
+        {
+            Dictionary<int, Dictionary<Players, int>> startingPlayerValueMap = player.GetPlayerValue;
+            player.GetPlayerValue = getPlayerValue;
+            (int y, int x) returnValue = player.SelectTile(currentTree);
+            player.GetPlayerValue = startingPlayerValueMap;
+            return returnValue;
         }
 
         //public static int Print<T> (this T board)

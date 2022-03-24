@@ -57,6 +57,7 @@ namespace TikTakToe.ScreenStuff
 
         public Dictionary<Players, GBVPlayer> GetPlayer { get; set; }
 
+        static Dictionary<int, Dictionary<Players, int>> PlayerValueMap { get; set; }
         public GridBoardVersionPlayScreen(NeuralNet playerNet)
         {
             Objects = new List<GameObject>();
@@ -87,14 +88,19 @@ namespace TikTakToe.ScreenStuff
                 }
             }
 
+            temp(GameTree);
+
+
             Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, IGridBoard<GridBoardState, GridBoardSquare>>[] opponentMoves = new Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, IGridBoard<GridBoardState, GridBoardSquare>>[activePlayers.Count - 1];
             GBVPlayer trainingOpponent = GetPlayer[Players.Player1];
-            opponentMoves[0] = (board, random) => trainingOpponent.SelectTile((GridBoard)board).FindChild(Players.Player1, (GridBoard)board);
+            PlayerValueMap = GetPlayer[Players.Player1].GetPlayerValue;
+            opponentMoves[0] = (board, random) => trainingOpponent.SelectTile((GridBoard)board, PlayerValueMap).FindChild(Players.Player1, (GridBoard)board);
+            //opponentMoves[0] = (board, random) => trainingOpponent.SelectTile((GridBoard)board).FindChild(Players.Player1, (GridBoard)board);
 
 
             //////lets add a minimax player just to train the neuralNet with. I think the randomization of the basic player is messing up training. If not, investigate why the generationalWinningMoves count is so unpredictable
 
-
+            ///Test why some losing cases are excluded from the GetPlayerValue dictionary and also why the maxi max lost to the neural net player and also if the neural net player has a proper training curve. Bonus challenge is to figure out why I have so many collections
 
 
             //GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
@@ -111,6 +117,29 @@ namespace TikTakToe.ScreenStuff
             }
         }
 
+        public void temp(GridBoard currentTree)
+        {
+            if(currentTree.GetChildren().Count > 0)
+            {
+                var children = currentTree.GetChildren();
+                for (int i = 0; i < children.Count; i++)
+                {
+                    int val = children[i].CurrentBoard.Print();
+                    int val2 = children[i].CurrentBoard.Print();
+                    int val3 = children[i].CurrentBoard.Print();
+                    if(val != val2 || val != val3)
+                    {
+                        throw new Exception("something is broken");
+                    }
+                    var thing = GetPlayer[Players.Player1].GetPlayerValue[val];
+                    temp((GridBoard)children[i]);
+                }
+            }
+            else
+            {
+
+            }
+        }
 
         public static int TotalMultipleMoves;
         public static int TotalNoMoves;
@@ -258,7 +287,7 @@ namespace TikTakToe.ScreenStuff
                 {
                     Players winner = currentPair.Board.GetWinner();
                     currentPair.Success = 4;
-                    if(winner == neuralNetPlayer)
+                    if (winner == neuralNetPlayer)
                     {
                         currentPair.Success = 10000;
                         winningMoveSelected = true;
@@ -316,7 +345,7 @@ namespace TikTakToe.ScreenStuff
                             totalCorrectMoves++;
                             generationalCorrectMoves[currentIndex]++;
                         }
-                        if(moveStats.WinningMoveSelected)
+                        if (moveStats.WinningMoveSelected)
                         {
                             totalWinningMoves++;
                             generationalWinningMoves[currentIndex]++;
