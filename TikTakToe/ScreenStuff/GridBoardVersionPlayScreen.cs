@@ -90,12 +90,12 @@ namespace TikTakToe.ScreenStuff
 
             temp(GameTree);
 
-
+                   
             Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, IGridBoard<GridBoardState, GridBoardSquare>>[] opponentMoves = new Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, IGridBoard<GridBoardState, GridBoardSquare>>[activePlayers.Count - 1];
             GBVPlayer trainingOpponent = GetPlayer[Players.Player1];
             PlayerValueMap = GetPlayer[Players.Player1].GetPlayerValue;
-            opponentMoves[0] = (board, random) => trainingOpponent.SelectTile((GridBoard)board, PlayerValueMap).FindChild(Players.Player1, (GridBoard)board);
-            //opponentMoves[0] = (board, random) => trainingOpponent.SelectTile((GridBoard)board).FindChild(Players.Player1, (GridBoard)board);
+            //opponentMoves[0] = (board, random) => trainingOpponent.SelectTile((GridBoard)board, PlayerValueMap).FindChild(Players.Player1, (GridBoard)board);
+            opponentMoves[0] = (board, random) => trainingOpponent.SelectTile((GridBoard)board).FindChild(Players.Player1, (GridBoard)board);
 
 
             //////lets add a minimax player just to train the neuralNet with. I think the randomization of the basic player is messing up training. If not, investigate why the generationalWinningMoves count is so unpredictable

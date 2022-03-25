@@ -33,13 +33,13 @@ namespace TikTakToe.GBVPlayerTypes
                         {
                             GetPlayerValue[currentBoardValue].Add(player, 1);
                         }
-                        else if (winner != player && winner != Players.None)
+                        else if (winner == Players.None)
                         {
-                            GetPlayerValue[currentBoardValue].Add(player, -1);
+                            GetPlayerValue[currentBoardValue].Add(player, 0);
                         }
                         else
                         {
-                            GetPlayerValue[currentBoardValue].Add(player, 0);
+                            GetPlayerValue[currentBoardValue].Add(player, -1);
                         }
                     }
                 }
@@ -70,6 +70,10 @@ namespace TikTakToe.GBVPlayerTypes
                     }
                 }
             }
+            else
+            {
+
+            }
         }
 
         public override (int y, int x) SelectTile(GridBoard currentTree)
@@ -77,11 +81,16 @@ namespace TikTakToe.GBVPlayerTypes
             (int, int) maximizerMove = currentTree.RandomMove(random);
             int largestValue = int.MinValue;
 
+            //int superTemp2 = currentTree.CurrentBoard.Print();
+            //Players winner2 = currentTree.GetWinner();
+            //bool isLose2 = winner2 != currentTree.NextPlayer && winner2 != Players.None;
+
             var children = currentTree.GetChildren();
             for (int i = 0; i < children.Count; i++)
             {
                 int superTemp = children[i].CurrentBoard.Print();
-                bool isLose = children[i].GetWinner() != children[i].NextPlayer && children[i].GetWinner() != Players.None;
+                Players winner = children[i].GetWinner();
+                bool isLose = winner != children[i].NextPlayer && winner != Players.None;
                 if (!isLose)
                 {
                     int temp = GetPlayerValue[superTemp][currentTree.NextPlayer];
