@@ -62,7 +62,7 @@ namespace TikTakToe
             WinSize = winSize;
             this.nextPlayerMap = nextPlayerMap;
 
-            SetCurrentGame(currentBoard);
+            SetCurrentGame(currentBoard, previousPlayer);
         }
 
         public void UpdateStatus()
@@ -215,8 +215,10 @@ namespace TikTakToe
             return false;
         }
 
-        public void SetCurrentGame(GridBoardSquare[][] targetBoard)
+        public void SetCurrentGame(GridBoardSquare[][] targetBoard, Players previousPlayer)
         {
+            PreviousPlayer = previousPlayer; 
+
             if (CurrentBoard == null)
             {
                 CurrentBoard = new GridBoardSquare[targetBoard.Length][];
