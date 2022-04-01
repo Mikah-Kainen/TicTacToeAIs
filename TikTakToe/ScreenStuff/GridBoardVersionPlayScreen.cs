@@ -46,7 +46,7 @@ namespace TikTakToe.ScreenStuff
             [Players.None] = Color.White,
             [Players.Player1] = Color.Red,
             [Players.Player2] = Color.Blue,
-            //[Enums.Players.Player3] = Color.Yellow,
+            [Players.Player3] = Color.Yellow,
         };
 
         public Dictionary<Players, Func<GridBoard, Players>> GetNextPlayer = new Dictionary<Players, Func<GridBoard, Players>>()
@@ -72,10 +72,15 @@ namespace TikTakToe.ScreenStuff
             //activePlayers.Add(Players.Player3);
 
             GetPlayer = new Dictionary<Players, GBVPlayer>();
-            //GetPlayer.Add(Players.Player1, new MaxiMaxPlayer(Players.Player1, activePlayers, Random));
+
             GetPlayer.Add(Players.Player1, new GBVBasicPlayer(Players.Player1, Random));
             //GetPlayer.Add(Players.Player1, new GBVMaxiMaxPlayer(Players.Player1, activePlayers, Random));
+
             GetPlayer.Add(Players.Player2, new GBVNeuralNetPlayer(Players.Player2, playerNet, Random));
+
+            //GetPlayer.Add(Players.Player3, new GBVBasicPlayer(Players.Player3, Random));
+            //GetPlayer.Add(Players.Player3, new GBVMaxiMaxPlayer(Players.Player3, activePlayers, Random));
+            GetPlayer.Add(Players.Player3, new GBVRandomPlayer(Players.Player3, Random));
 
             GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
             //GameTree.CreateTree(GameTree);
@@ -92,8 +97,13 @@ namespace TikTakToe.ScreenStuff
 
                    
             Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, IGridBoard<GridBoardState, GridBoardSquare>>[] opponentMoves = new Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, IGridBoard<GridBoardState, GridBoardSquare>>[activePlayers.Count - 1];
-            GBVPlayer trainingOpponent = GetPlayer[Players.Player1];
-            PlayerValueMap = GetPlayer[Players.Player1].GetPlayerValue;
+            GBVPlayer trainingOpponent = GetPlayer[Players.Player3];
+            if(trainingOpponent is GBVMaxiMaxPlayer maxiMaxOpponent && maxiMaxOpponent.GetPlayerValue == null)
+            {
+                maxiMaxOpponent.GetPlayerValue = new Dictionary<int, Dictionary<Players, int>>();
+                maxiMaxOpponent.SetValues(GameTree);
+            }
+            //PlayerValueMap = GetPlayer[Players.Player1].GetPlayerValue;
             //opponentMoves[0] = (board, random) => trainingOpponent.SelectTile((GridBoard)board, PlayerValueMap).FindChild(Players.Player1, (GridBoard)board);
             opponentMoves[0] = (board, random) => trainingOpponent.SelectTile((GridBoard)board).FindChild(Players.Player1, (GridBoard)board);
 
@@ -102,17 +112,23 @@ namespace TikTakToe.ScreenStuff
 
             //GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
             TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats> trainer = new TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats>();
+            trainer.BoardDied += (s, e) =>
+            {
+                ;
+            };
 
             foreach (Players player in activePlayers)
             {
                 if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                 {
-                    currentPlayer.Net = trainer.GetNet(GameTree, activePlayers.ToArray(), MakeMove, opponentMoves, 1000, 150, Random, playerNet);
+                    currentPlayer.Net = trainer.GetNet(GameTree, activePlayers.ToArray(), MakeMove, opponentMoves, 1000, 450, Random, playerNet);
                     GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
                     InterpretData(trainer.TrainingStats);
                 }
             }
         }
+
+        public static int[] GameLength = new int[9];
 
         public static int TotalMultipleMoves;
         public static int TotalNoMoves;
@@ -274,11 +290,16 @@ namespace TikTakToe.ScreenStuff
                         currentPair.Success = 10000;
                         winningMoveSelected = true;
                     }
-                    correctMoveSelected = true;
-                    return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected, tieMoveSelected, winningMoveSelected);
                 }
                 currentPair.Success++;
                 correctMoveSelected = true;
+
+
+                if(!((GridBoard)currentPair.Board).IsPlayable())
+                {
+
+                }
+
                 return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected, tieMoveSelected, winningMoveSelected);
             deathZone:;
             }
