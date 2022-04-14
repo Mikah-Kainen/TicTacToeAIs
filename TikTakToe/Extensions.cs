@@ -30,6 +30,22 @@ namespace TikTakToe
             return returnValue;
         }
 
+        public static int MovesMade(this GridBoard deadBoard)
+        {
+            int movesMade = 0;
+            for(int y = 0; y < deadBoard.YLength; y ++)
+            {
+                for(int x = 0; x < deadBoard.XLength; x ++)
+                {
+                    if(deadBoard[y, x].State.Owner != Players.None)
+                    {
+                        movesMade++;
+                    }
+                }
+            }
+            return movesMade;
+        }
+
         //public static int Print<T> (this T board)
         //    where T : IGameState<T>
         //{

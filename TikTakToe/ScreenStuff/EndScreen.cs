@@ -56,7 +56,7 @@ namespace TikTakToe.ScreenStuff
                 else if(loadButton.HitBox.Contains(Game1.InputManager.Mouse.Position))
                 {
                     Game1.ScreenManager.Clear();
-                    Game1.ScreenManager.SetScreen(new GridBoardVersionPlayScreen(NeuralNetwork.TurnBasedBoardGameTrainerStuff.TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats>.LoadNet("NeuralNet.json")));
+                    Game1.ScreenManager.SetScreen(new GridBoardVersionPlayScreen(NeuralNetwork.TurnBasedBoardGameTrainerStuff.TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>.LoadNet("NeuralNet.json")));
                 }
             }
         }

@@ -15,25 +15,7 @@ using TikTakToe.DrawStuff;
 using TikTakToe.GBVPlayerTypes;
 
 namespace TikTakToe.ScreenStuff
-{
-    public class MoveStats
-    {
-        public bool MultipleMovesSelected;
-        public bool NoMoveSelected;
-        public bool ImpossibleMoveSelected;
-        public bool CorrectMoveSelected;
-        public bool TieMoveSelected;
-        public bool WinningMoveSelected;
-        public MoveStats(bool multipleMovesSelected, bool noMoveSelected, bool impossibleMoveSelected, bool correctMoveSelected, bool tieMoveSelected, bool winningMoveSelected)
-        {
-            MultipleMovesSelected = multipleMovesSelected;
-            NoMoveSelected = noMoveSelected;
-            ImpossibleMoveSelected = impossibleMoveSelected;
-            CorrectMoveSelected = correctMoveSelected;
-            TieMoveSelected = tieMoveSelected;
-            WinningMoveSelected = winningMoveSelected;
-        }
-    }
+{ 
 
     class GridBoardVersionPlayScreen : IScreen
     {
@@ -111,36 +93,57 @@ namespace TikTakToe.ScreenStuff
          
 
             //GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
-            TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats> trainer = new TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare, MoveStats>();
-            trainer.BoardDied += (s, e) =>
+            TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare> trainer = new TurnBasedBoardGameTrainer<GridBoardState, GridBoardSquare>();
+            trainer.BoardDied += (trainer, deadBoardIntTuple) =>
             {
-                ;
+                IGridBoard<GridBoardState, GridBoardSquare> deadBoard;
+                int currentGeneration;
+                
+                (deadBoard, currentGeneration) = deadBoardIntTuple;
+
+                Players winner = deadBoard.GetWinner();
+                if(winner == Players.None)
+                {
+                    TieMoves++;
+                    GenerationalTieMoves[currentGeneration]++;
+                }
+                else if(winner == activePlayers[activePlayers.Count - 1])
+                {
+                    WinningMoves++;
+                    GenerationalWinningMoves[currentGeneration]++;
+                }
+                else
+                {
+                    LosingMoves++;
+                    GenerationalLosingMoves[currentGeneration]++;
+                }
+                GameLengthCounts[((GridBoard)deadBoard).MovesMade()]++;
             };
 
+            int totalGenerations = 1000;
+            GenerationalLosingMoves = new int[totalGenerations];
+            GenerationalTieMoves = new int[totalGenerations];
+            GenerationalWinningMoves = new int[totalGenerations];
             foreach (Players player in activePlayers)
             {
                 if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                 {
-                    currentPlayer.Net = trainer.GetNet(GameTree, activePlayers.ToArray(), MakeMove, opponentMoves, 1000, 450, Random, playerNet);
-                    GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
-                    InterpretData(trainer.TrainingStats);
+                    currentPlayer.Net = trainer.GetNet(GameTree, activePlayers.ToArray(), MakeMove, opponentMoves, numberOfSimulations: 1000, totalGenerations, Random, playerNet);
+                    GameTree = new GridBoard(GridBoard.CreateNewGridSquares(ylength: 3, xlength: 3), Players.None, winSize: 3, GetNextPlayer);
                 }
             }
         }
 
-        public static int[] GameLength = new int[9];
+        public int LosingMoves;
+        public int[] GenerationalLosingMoves;
 
-        public static int TotalMultipleMoves;
-        public static int TotalNoMoves;
-        public static int TotalImpossibleMoves;
-        public static int TotalCorrectMoves;
-        public static int[] GenerationalCorrectMoves;
+        public int TieMoves;
+        public int[] GenerationalTieMoves;
 
-        public static int TotalTieMoves;
-        public static int[] GenerationalTieMoves;
+        public int WinningMoves;
+        public int[] GenerationalWinningMoves;
 
-        public static int TotalWinningMoves;
-        public static int[] GenerationalWinningMoves;
+        public int[] GameLengthCounts = new int[10];
 
         public void Update(GameTime gameTime)
         {
@@ -203,7 +206,7 @@ namespace TikTakToe.ScreenStuff
         }
 
 
-        public MoveStats MakeMove(BoardNetPair<GridBoardState, GridBoardSquare> currentPair, Random random)
+        public void MakeMove(BoardNetPair<GridBoardState, GridBoardSquare> currentPair, Random random)
         {
             bool multipleMovesSelected = false;
             bool noMoveSelected = false;
@@ -265,6 +268,12 @@ namespace TikTakToe.ScreenStuff
                 int xVal = target % currentPair.Board.XLength;
                 if (currentPair.Board[yVal, xVal].State.Owner != Players.None)
                 {
+                    if(currentPair.Board.IsTerminal)
+                    {
+
+                    }
+
+
                     impossibleMoveSelected = true;
                     goto deathZone;
                 }
@@ -274,6 +283,7 @@ namespace TikTakToe.ScreenStuff
                     {
                         currentPair.Board = children[z];
                         currentPair.Success++;
+                        break;
                     }
                 }
                 if (currentPair.Board.IsTerminal == true)
@@ -300,85 +310,14 @@ namespace TikTakToe.ScreenStuff
 
                 }
 
-                return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected, tieMoveSelected, winningMoveSelected);
-            deathZone:;
+                return;
+                deathZone:;
             }
             else
             {
 
             }
             currentPair.Board = children[random.Next(0, children.Count)];
-            return new MoveStats(multipleMovesSelected, noMoveSelected, impossibleMoveSelected, correctMoveSelected, tieMoveSelected, winningMoveSelected);
-        }
-
-        public void InterpretData(List<MoveStats>[][] TrainingStats)
-        {
-            int totalMultipleMoves = 0;
-            int totalNoMoves = 0;
-            int totalImpossibleMoves = 0;
-            int totalCorrectMoves = 0;
-            int[] generationalCorrectMoves = new int[TrainingStats.Length];
-
-            int totalTieMoves = 0;
-            int[] generationalTieMoves = new int[TrainingStats.Length];
-
-            int totalWinningMoves = 0;
-            int[] generationalWinningMoves = new int[TrainingStats.Length];
-
-            int currentIndex = TrainingStats.Length;
-
-            foreach (List<MoveStats>[] subArray in TrainingStats)
-            {
-                currentIndex--;
-                generationalCorrectMoves[currentIndex] = 0;
-                foreach (List<MoveStats> subList in subArray)
-                {
-                    foreach (MoveStats moveStats in subList)
-                    {
-                        if (moveStats.MultipleMovesSelected)
-                        {
-                            totalMultipleMoves++;
-                        }
-                        if (moveStats.NoMoveSelected)
-                        {
-                            totalNoMoves++;
-                        }
-                        if (moveStats.ImpossibleMoveSelected)
-                        {
-                            totalImpossibleMoves++;
-                        }
-                        if (moveStats.CorrectMoveSelected)
-                        {
-                            totalCorrectMoves++;
-                            generationalCorrectMoves[currentIndex]++;
-                        }
-
-                        if(moveStats.TieMoveSelected)
-                        {
-                            totalTieMoves++;
-                            generationalTieMoves[currentIndex]++;
-                        }
-
-                        if (moveStats.WinningMoveSelected)
-                        {
-                            totalWinningMoves++;
-                            generationalWinningMoves[currentIndex]++;
-                        }
-                    }
-                }
-            }
-
-            TotalMultipleMoves = totalMultipleMoves;
-            TotalNoMoves = totalNoMoves;
-            TotalImpossibleMoves = totalImpossibleMoves;
-            TotalCorrectMoves = totalCorrectMoves;
-            GenerationalCorrectMoves = generationalCorrectMoves;
-
-            TotalTieMoves = totalTieMoves;
-            GenerationalTieMoves = generationalTieMoves;
-
-            TotalWinningMoves = totalWinningMoves;
-            GenerationalWinningMoves = generationalWinningMoves;
         }
     }
 }
