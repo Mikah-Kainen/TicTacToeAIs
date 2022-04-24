@@ -35,13 +35,13 @@ namespace TikTakToe
     {
         public int WinSize { get; set; }
         public Players PreviousPlayer { get; set; }
-        public bool IsWin { get; private set; }
+         bool IsWin { get; set; }
 
-        public bool IsTie { get; private set; }
+        bool IsTie { get; set; }
 
-        public bool IsLose { get; private set; }
+        bool IsLose { get; set; }
 
-        public bool IsTerminal => IsWin || IsTie || IsLose;
+        public bool IsTerminal => GetWinner() != Players.None;
 
         public Players NextPlayer => nextPlayerMap[PreviousPlayer](this);
 

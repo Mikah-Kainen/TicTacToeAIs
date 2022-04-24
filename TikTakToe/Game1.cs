@@ -30,6 +30,7 @@ namespace TikTakToe
 
             //Goal get names of all the colors
             string text = typeof(Color).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).Select(x => x.Name).Aggregate((x, y) => x + ",\n" + y);
+
         }
 
         protected override void Initialize()
