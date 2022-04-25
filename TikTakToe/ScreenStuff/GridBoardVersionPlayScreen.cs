@@ -55,15 +55,15 @@ namespace TikTakToe.ScreenStuff
 
             GetPlayer = new Dictionary<Players, GBVPlayer>();
 
-            GetPlayer.Add(Players.Player1, new GBVRandomPlayer(Players.Player1, Random));
-            //GetPlayer.Add(Players.Player1, new GBVBasicPlayer(Players.Player1, Random));
+            //GetPlayer.Add(Players.Player1, new GBVRandomPlayer(Players.Player1, Random));
+            GetPlayer.Add(Players.Player1, new GBVBasicPlayer(Players.Player1, Random));
             //GetPlayer.Add(Players.Player1, new GBVMaxiMaxPlayer(Players.Player1, activePlayers, Random));
 
             GetPlayer.Add(Players.Player2, new GBVNeuralNetPlayer(Players.Player2, playerNet, Random));
 
+            //GetPlayer.Add(Players.Player3, new GBVRandomPlayer(Players.Player3, Random));
             GetPlayer.Add(Players.Player3, new GBVBasicPlayer(Players.Player3, Random));
             //GetPlayer.Add(Players.Player3, new GBVMaxiMaxPlayer(Players.Player3, activePlayers, Random));
-            //GetPlayer.Add(Players.Player3, new GBVRandomPlayer(Players.Player3, Random));
 
             GameTree = new GridBoard(GridBoard.CreateNewGridSquares(3, 3), Players.None, 3, GetNextPlayer);
             //GameTree.CreateTree(GameTree);
@@ -80,7 +80,7 @@ namespace TikTakToe.ScreenStuff
 
                    
             Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, bool>[] opponentMoves = new Func<IGridBoard<GridBoardState, GridBoardSquare>, Random, bool>[activePlayers.Count - 1];
-            GBVPlayer trainingOpponent = GetPlayer[Players.Player3];
+            GBVPlayer trainingOpponent = GetPlayer[Players.Player1];
             if(trainingOpponent is GBVMaxiMaxPlayer maxiMaxOpponent && maxiMaxOpponent.GetPlayerValue == null)
             {
                 maxiMaxOpponent.GetPlayerValue = new Dictionary<int, Dictionary<Players, int>>();
@@ -91,7 +91,6 @@ namespace TikTakToe.ScreenStuff
             opponentMoves[0] = (board, random) =>
             {
                 (int y, int x) = trainingOpponent.SelectTile((GridBoard)board);
-                board[y, x].State.Owner = trainingOpponent.PlayerID;
 
                 if (board[y, x].State.Owner != Players.None)
                 {
@@ -99,6 +98,7 @@ namespace TikTakToe.ScreenStuff
                 }
 
                 board[y, x].State.Owner = trainingOpponent.PlayerID;
+                ((GridBoard)board).PreviousPlayer = trainingOpponent.PlayerID;
                 if (board.GetWinner() != Players.None)
                 {
                     return false;
@@ -121,8 +121,27 @@ namespace TikTakToe.ScreenStuff
                 Players winner = deadBoard.GetWinner();
                 if(winner == Players.None)
                 {
-                    TieMoves++;
-                    GenerationalTieMoves[currentGeneration]++;
+                    bool isUnownedSquare = false;
+                    for (int y = 0; y < deadBoard.YLength; y++)
+                    {
+                        for (int x = 0; x < deadBoard.XLength; x++)
+                        {
+                            if (deadBoard[y, x].State.Owner == Players.None)
+                            {
+                                isUnownedSquare = true;
+                            }
+                        }
+                    }
+                    if (isUnownedSquare)
+                    {
+                        InvalidMoves++;
+                        GenerationalInvalidMoves[currentGeneration]++;
+                    }
+                    else
+                    {
+                        TieMoves++;
+                        GenerationalTieMoves[currentGeneration]++;
+                    }
                 }
                 else if(winner == activePlayers[activePlayers.Count - 1])
                 {
@@ -137,7 +156,8 @@ namespace TikTakToe.ScreenStuff
                 GameLengthCounts[((GridBoard)deadBoard).MovesMade()]++;
             };
 
-            int totalGenerations = 150;
+            int totalGenerations = 2500;
+            GenerationalInvalidMoves = new int[totalGenerations];
             GenerationalLosingMoves = new int[totalGenerations];
             GenerationalTieMoves = new int[totalGenerations];
             GenerationalWinningMoves = new int[totalGenerations];
@@ -150,6 +170,9 @@ namespace TikTakToe.ScreenStuff
                 }
             }
         }
+
+        public int InvalidMoves;
+        public int[] GenerationalInvalidMoves;
 
         public int LosingMoves;
         public int[] GenerationalLosingMoves;
@@ -277,6 +300,7 @@ namespace TikTakToe.ScreenStuff
             }
 
             currentPair.Board[selectedY, selectedX].State.Owner = neuralNetPlayer;
+            ((GridBoard)currentPair.Board).PreviousPlayer = neuralNetPlayer;
             currentPair.Success++;
             if(currentPair.Board.GetWinner() == neuralNetPlayer)
             {
