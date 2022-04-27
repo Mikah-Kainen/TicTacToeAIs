@@ -55,8 +55,9 @@ namespace TikTakToe.ScreenStuff
 
             GetPlayer = new Dictionary<Players, GBVPlayer>();
 
+            GetPlayer.Add(Players.Player1, new GBVOverfitPlayer(Players.Player1));
             //GetPlayer.Add(Players.Player1, new GBVRandomPlayer(Players.Player1, Random));
-            GetPlayer.Add(Players.Player1, new GBVBasicPlayer(Players.Player1, Random));
+            //GetPlayer.Add(Players.Player1, new GBVBasicPlayer(Players.Player1, Random));
             //GetPlayer.Add(Players.Player1, new GBVMaxiMaxPlayer(Players.Player1, activePlayers, Random));
 
             GetPlayer.Add(Players.Player2, new GBVNeuralNetPlayer(Players.Player2, playerNet, Random));
@@ -156,7 +157,7 @@ namespace TikTakToe.ScreenStuff
                 GameLengthCounts[((GridBoard)deadBoard).MovesMade()]++;
             };
 
-            int totalGenerations = 2500;
+            int totalGenerations = 300;
             GenerationalInvalidMoves = new int[totalGenerations];
             GenerationalLosingMoves = new int[totalGenerations];
             GenerationalTieMoves = new int[totalGenerations];
