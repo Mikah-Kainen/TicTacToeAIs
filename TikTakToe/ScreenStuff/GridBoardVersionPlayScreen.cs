@@ -166,7 +166,7 @@ namespace TikTakToe.ScreenStuff
             {
                 if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                 {
-                   currentPlayer.Net = trainer.GetNet(GameTree, activePlayers.ToArray(), MakeNeuralNetMove, opponentMoves, numberOfSimulations: 1000, totalGenerations, Random, playerNet);
+                   currentPlayer.Net = trainer.GetNet(GameTree, activePlayers.ToArray(), MakeNeuralNetMove, opponentMoves, numberOfSimulations: 500, totalGenerations, Random, playerNet);
                    GameTree = new GridBoard(GridBoard.CreateNewGridSquares(ylength: 3, xlength: 3), Players.None, winSize: 3, GetNextPlayer);
                 }
             }
@@ -256,51 +256,53 @@ namespace TikTakToe.ScreenStuff
                 return false;
             }
 
-            double[] inputs = new double[currentPair.Board.YLength * currentPair.Board.XLength];
-            Array.Copy(currentPair.Board.CurrentBoard.Select(x => x.Select(y => (int)y.State.Owner)).Aggregate((x, y) => x.Concat(y)).ToArray(), inputs, inputs.Length);
+            //bool outputValid = false;
+            //int selected = 0;
+            //for(int i = 0; i < inputs.Length; i ++)
+            //{
+            //    if(output[i] == 0)
+            //    {
 
-            double[] output = currentPair.Net.Compute(inputs);
-            bool outputValid = false;
-            int selected = 0;
-            for(int i = 0; i < inputs.Length; i ++)
-            {
-                if(output[i] == 0)
-                {
+            //    }
+            //    else if(output[i] == 1)
+            //    {
+            //        if(!outputValid)
+            //        {
+            //            outputValid = true;
+            //            selected = i;
+            //        }
+            //        else
+            //        {
+            //            outputValid = false;
+            //            break;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        throw new Exception("SOMETHING IS WRONG");
+            //    }
+            //}
 
-                }
-                else if(output[i] == 1)
-                {
-                    if(!outputValid)
-                    {
-                        outputValid = true;
-                        selected = i;
-                    }
-                    else
-                    {
-                        outputValid = false;
-                        break;
-                    }
-                }
-                else
-                {
-                    throw new Exception("SOMETHING IS WRONG");
-                }
-            }
+            //if(!outputValid)
+            //{
+            //    return false;
+            //}
 
-            if(!outputValid)
+            //int selectedX = selected % currentPair.Board.YLength;
+            //int selectedY = selected / currentPair.Board.YLength;
+
+            //if(currentPair.Board[selectedY, selectedX].State.Owner != Players.None)
+            //{
+            //    return false;
+            //}
+
+            (int selectedY, int selectedX) selected = currentPair.BoardNetPairToNeuralNetOutput();
+            if(currentPair.Board[selected.selectedY, selected.selectedX].State.Owner != Players.None)
             {
                 return false;
             }
 
-            int selectedX = selected % currentPair.Board.YLength;
-            int selectedY = selected / currentPair.Board.YLength;
-
-            if(currentPair.Board[selectedY, selectedX].State.Owner != Players.None)
-            {
-                return false;
-            }
-
-            currentPair.Board[selectedY, selectedX].State.Owner = neuralNetPlayer;
+            currentPair.Board[selected.selectedY, selected.selectedX].State.Owner = neuralNetPlayer;
             ((GridBoard)currentPair.Board).PreviousPlayer = neuralNetPlayer;
             currentPair.Success++;
             if(currentPair.Board.GetWinner() == neuralNetPlayer)

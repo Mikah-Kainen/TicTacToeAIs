@@ -6,6 +6,7 @@ using NeuralNetwork.TurnBasedBoardGameTrainerStuff.Enums;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using TikTakToe.GBVPlayerTypes;
@@ -44,6 +45,27 @@ namespace TikTakToe
                 }
             }
             return movesMade;
+        }
+
+        public static (int y, int x) BoardNetPairToNeuralNetOutput(this BoardNetPair<GridBoardState, GridBoardSquare> currentPair)
+        {
+            double[] inputs = new double[currentPair.Board.YLength * currentPair.Board.XLength];
+            Array.Copy(currentPair.Board.CurrentBoard.Select(x => x.Select(y => (int)y.State.Owner)).Aggregate((x, y) => x.Concat(y)).ToArray(), inputs, inputs.Length);
+            double[] output = currentPair.Net.Compute(inputs);
+
+            int selected = 0;
+            if (output[0] == 1)
+            {
+                selected = currentPair.Board.XLength * currentPair.Board.YLength - 1;
+            }
+            else
+            {
+                selected = (int)(output[0] * currentPair.Board.XLength * currentPair.Board.YLength);
+            }
+            int selectedX = selected % currentPair.Board.YLength;
+            int selectedY = selected / currentPair.Board.YLength;
+
+            return (selectedY, selectedX);
         }
 
         //public static int Print<T> (this T board)
