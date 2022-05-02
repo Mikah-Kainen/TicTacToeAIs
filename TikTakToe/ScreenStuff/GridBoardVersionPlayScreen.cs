@@ -157,7 +157,7 @@ namespace TikTakToe.ScreenStuff
                 GameLengthCounts[((GridBoard)deadBoard).MovesMade()]++;
             };
 
-            int totalGenerations = 300;
+            int totalGenerations = 50;
             GenerationalInvalidMoves = new int[totalGenerations];
             GenerationalLosingMoves = new int[totalGenerations];
             GenerationalTieMoves = new int[totalGenerations];
@@ -166,7 +166,7 @@ namespace TikTakToe.ScreenStuff
             {
                 if (GetPlayer[player] is GBVNeuralNetPlayer currentPlayer)
                 {
-                   currentPlayer.Net = trainer.GetNet(GameTree, activePlayers.ToArray(), MakeNeuralNetMove, opponentMoves, numberOfSimulations: 500, totalGenerations, Random, playerNet);
+                   currentPlayer.Net = trainer.GetNet(GameTree, activePlayers.ToArray(), MakeNeuralNetMove, opponentMoves, numberOfSimulations: 1000, totalGenerations, Random, playerNet);
                    GameTree = new GridBoard(GridBoard.CreateNewGridSquares(ylength: 3, xlength: 3), Players.None, winSize: 3, GetNextPlayer);
                 }
             }
